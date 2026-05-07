@@ -138,7 +138,7 @@ export function HiveSelector({
           placeholder="Новый улей"
           value={newHiveName}
         />
-        <button onClick={onAddHive} type="button">
+        <button className={styles.addButton} onClick={onAddHive} type="button">
           Добавить
         </button>
       </div>
@@ -152,7 +152,7 @@ export function HiveSelector({
           }}
           value={renameName}
         />
-        <button onClick={submitRename} type="button">
+        <button className={styles.renameButton} onClick={submitRename} type="button">
           Переименовать
         </button>
       </div>

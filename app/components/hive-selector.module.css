@@ -61,6 +61,7 @@
 .addRow,
 .renameRow {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
   margin-top: 12px;
 }
@@ -79,21 +80,44 @@
   background: #ffffff;
 }
 
-.addRow button,
-.renameRow button {
+.addButton,
+.renameButton {
   min-height: 48px;
   border-radius: 8px;
-  padding: 0 16px;
-  background: #1d1a13;
-  color: #fff;
+  padding: 0 14px;
+  border: 1px solid transparent;
   font-weight: 800;
+  white-space: nowrap;
   transition:
     background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
     transform 160ms ease;
 }
 
-.addRow button:active,
-.renameRow button:active {
+.addButton {
+  background: #f5c542;
+  border-color: #e0ad28;
+  color: #211601;
+}
+
+.renameButton {
+  background: #fffaf0;
+  border-color: #dfd2b1;
+  color: #665d4a;
+}
+
+.addButton:hover {
+  background: #f1bc33;
+}
+
+.renameButton:hover {
+  border-color: #c8b98f;
+  color: #1d1a13;
+}
+
+.addButton:active,
+.renameButton:active {
   transform: translateY(1px);
 }
 
@@ -112,12 +136,24 @@
   .tile,
   .select,
   .delete,
-  .addRow button,
-  .renameRow button {
+  .addButton,
+  .renameButton {
     transition: none;
   }
 
   .active {
     transform: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .addRow,
+  .renameRow {
+    grid-template-columns: 1fr;
+  }
+
+  .addButton,
+  .renameButton {
+    width: 100%;
   }
 }
