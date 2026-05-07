@@ -223,12 +223,15 @@ h1 {
 }
 
 .entry-field {
+  position: relative;
   display: grid;
-  gap: 6px;
-  padding: 12px;
+  gap: 10px;
+  padding: 13px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.7);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 250, 240, 0.85)),
+    var(--surface);
   color: var(--muted);
   font-size: 0.94rem;
   font-weight: 800;
@@ -241,15 +244,15 @@ h1 {
 }
 
 .entry-field span {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 30px;
+  border-radius: 999px;
+  padding: 0 10px;
+  background: #efe5c9;
   color: var(--text);
-  font-size: 1rem;
-}
-
-.entry-field small {
-  color: var(--muted);
-  font-size: 0.82rem;
-  font-weight: 650;
-  line-height: 1.3;
+  font-size: 0.94rem;
 }
 
 textarea {
@@ -261,6 +264,7 @@ textarea {
   padding: 12px;
   background: var(--surface-strong);
   color: var(--text);
+  font-size: 1rem;
   line-height: 1.4;
 }
 

@@ -245,7 +245,6 @@ export default function Home() {
         <div className="field-grid">
           <label className={targetField === "done" ? "entry-field active" : "entry-field"}>
             <span>Сделано</span>
-            <small>Что уже сделали у этого улья</small>
             <textarea
               onChange={(event) => setDone(event.target.value)}
               placeholder="Например: проверил рамки, добавил вощину..."
@@ -254,12 +253,11 @@ export default function Home() {
           </label>
           <label className={targetField === "next" ? "entry-field active" : "entry-field"}>
             <span>В следующий раз</span>
-            <small>Что нужно не забыть при следующем осмотре</small>
-          <textarea
+            <textarea
               onChange={(event) => setNext(event.target.value)}
               placeholder="Например: проверить корм, посмотреть матку..."
               value={next}
-          />
+            />
           </label>
         </div>
 
