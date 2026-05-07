@@ -7,6 +7,9 @@ import { chromium, devices } from "@playwright/test";
 const PORT = 3210;
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${PORT}`;
 const ARTIFACT_DIR = ".ui-test-artifacts";
+const IPHONE_14_PRO = devices["iPhone 14 Pro"];
+const IPHONE_14_PRO_LANDSCAPE = devices["iPhone 14 Pro landscape"];
+const DESKTOP = { viewport: { width: 1440, height: 960 } };
 
 async function waitForServer(url, child, logs = [], timeoutMs = 30_000) {
   const startedAt = Date.now();
@@ -48,20 +51,20 @@ async function withServer(run) {
   }
 }
 
-async function newPage(browser, viewport) {
+async function newPage(browser, profile = IPHONE_14_PRO, options = {}) {
+  const { mockMediaRecorder = true, mockTranscription = true } = options;
   const context = await browser.newContext({
-    ...devices["iPhone 13"],
-    viewport,
+    ...profile,
     permissions: ["microphone"],
     reducedMotion: "reduce"
   });
 
-  await context.addInitScript(() => {
+  await context.addInitScript(({ mockMediaRecorder, mockTranscription }) => {
     const originalFetch = window.fetch.bind(window);
 
     window.fetch = (input, init) => {
       const url = typeof input === "string" ? input : input instanceof Request ? input.url : String(input);
-      if (url.includes("/api/transcribe")) {
+      if (mockTranscription && url.includes("/api/transcribe")) {
         return Promise.resolve(
           new Response(JSON.stringify({ text: "матка есть" }), {
             status: 200,
@@ -72,6 +75,12 @@ async function newPage(browser, viewport) {
 
       return originalFetch(input, init);
     };
+
+    if (!mockMediaRecorder) {
+      Object.defineProperty(navigator, "mediaDevices", { configurable: true, value: undefined });
+      Object.defineProperty(window, "MediaRecorder", { configurable: true, value: undefined });
+      return;
+    }
 
     Object.defineProperty(navigator, "mediaDevices", {
       configurable: true,
@@ -100,7 +109,7 @@ async function newPage(browser, viewport) {
     }
 
     window.MediaRecorder = FakeMediaRecorder;
-  });
+  }, { mockMediaRecorder, mockTranscription });
 
   const page = await context.newPage();
   const runtimeErrors = [];
@@ -112,11 +121,11 @@ async function newPage(browser, viewport) {
   return { context, page, runtimeErrors };
 }
 
-test("mobile gift flow is usable without layout or runtime regressions", async () => {
+test("iPhone 14 Pro portrait gift flow is usable without layout or runtime regressions", async () => {
   await withServer(async () => {
     await mkdir(ARTIFACT_DIR, { recursive: true });
     const browser = await chromium.launch();
-    const { context, page, runtimeErrors } = await newPage(browser, { width: 390, height: 844 });
+    const { context, page, runtimeErrors } = await newPage(browser, IPHONE_14_PRO);
 
     try {
       await page.goto(BASE_URL, { waitUntil: "networkidle" });
@@ -124,11 +133,11 @@ test("mobile gift flow is usable without layout or runtime regressions", async (
       await page.reload({ waitUntil: "networkidle" });
 
       await assert.equal(await page.locator("h1").textContent(), "Новая запись");
+      await assert.equal(await page.getByRole("combobox", { name: "Выбранный улей" }).count(), 1);
       await assertNoHorizontalOverflow(page);
       await assertTouchTargets(page);
-      await assertInViewport(page.getByRole("button", { name: "Сохранить запись" }));
       await assert.equal(await page.getByRole("button", { name: "Сохранить запись" }).isDisabled(), true);
-      await page.screenshot({ path: `${ARTIFACT_DIR}/mobile-home.png`, fullPage: true });
+      await page.screenshot({ path: `${ARTIFACT_DIR}/iphone-14-pro-home.png`, fullPage: true });
 
       await page.getByRole("button", { name: "Следующий осмотр" }).click();
       await page.getByRole("button", { name: "Диктовать" }).click();
@@ -136,6 +145,9 @@ test("mobile gift flow is usable without layout or runtime regressions", async (
       const nextTextarea = page.locator("label.entry-field").filter({ hasText: "Следующий осмотр" }).locator("textarea");
       await waitForValue(nextTextarea, /матка есть/);
       await assert.equal(await page.getByRole("button", { name: "Сохранить запись" }).isEnabled(), true);
+      await page.getByRole("button", { name: "Сохранить запись" }).scrollIntoViewIfNeeded();
+      await assertInViewport(page.getByRole("button", { name: "Сохранить запись" }));
+      await assertNotCoveredByBottomNav(page.getByRole("button", { name: "Сохранить запись" }));
 
       await page.getByLabel("Сделано").fill("Осмотрел рамки");
       await page.getByRole("button", { name: "Сохранить запись" }).click();
@@ -149,7 +161,7 @@ test("mobile gift flow is usable without layout or runtime regressions", async (
       await assert.equal(await page.getByText("Осмотрел рамки").isVisible(), true);
       await assert.equal(await page.getByText("матка есть").isVisible(), true);
       await assert.equal(await page.getByText("Запись 1").isVisible(), true);
-      await page.screenshot({ path: `${ARTIFACT_DIR}/mobile-history.png`, fullPage: true });
+      await page.screenshot({ path: `${ARTIFACT_DIR}/iphone-14-pro-history.png`, fullPage: true });
 
       await page.getByRole("button", { name: "Пасека" }).click();
       await assert.equal(await page.locator("h1").textContent(), "Пасека");
@@ -158,29 +170,117 @@ test("mobile gift flow is usable without layout or runtime regressions", async (
       await page.getByLabel("Название нового улья").fill("9");
       await page.getByRole("button", { name: "Добавить" }).click();
       await waitForValue(page.getByLabel("Переименовать выбранный улей"), /^9$/);
+      await assert.equal(await page.getByRole("heading", { name: "Улей 9" }).isVisible(), true);
 
       await page.getByLabel("Название нового улья").fill("9");
       await page.getByRole("button", { name: "Добавить" }).click();
       await assert.equal(await page.getByText("Улей с таким номером уже есть.").isVisible(), true);
 
-      await page.getByLabel("Переименовать выбранный улей").fill("Северный 9");
+      await page.getByLabel("Переименовать выбранный улей").fill("Северный участок пасеки 9");
       await page.getByRole("button", { name: "Переименовать" }).click();
-      await waitForValue(page.getByLabel("Переименовать выбранный улей"), /^Северный 9$/);
+      await waitForValue(page.getByLabel("Переименовать выбранный улей"), /^Северный участок пасеки 9$/);
       await assertNoWrappedHiveTiles(page);
       await assertNoHorizontalOverflow(page);
 
       page.once("dialog", async (dialog) => {
-        assert.match(dialog.message(), /Удалить улей Северный 9/);
+        assert.match(dialog.message(), /Удалить улей Северный участок пасеки 9/);
         await dialog.dismiss();
       });
-      await page.getByRole("button", { name: "Удалить улей Северный 9" }).click();
-      await assert.equal(await page.getByRole("button", { name: "Северный 9", exact: true }).isVisible(), true);
+      await page.getByRole("button", { name: "Удалить улей Северный участок пасеки 9" }).click();
+      await assert.equal(await page.getByRole("button", { name: "Северный участок пасеки 9", exact: true }).isVisible(), true);
 
       await page.keyboard.press("Tab");
       const focusedTag = await page.evaluate(() => document.activeElement?.tagName);
       assert.match(focusedTag ?? "", /BUTTON|INPUT|TEXTAREA/);
 
-      await page.screenshot({ path: `${ARTIFACT_DIR}/mobile-after-flow.png`, fullPage: true });
+      await page.screenshot({ path: `${ARTIFACT_DIR}/iphone-14-pro-hives.png`, fullPage: true });
+      assert.deepEqual(runtimeErrors, []);
+    } finally {
+      await context.close();
+      await browser.close();
+    }
+  });
+});
+
+test("iPhone 14 Pro landscape keeps every primary view usable", async () => {
+  await withServer(async () => {
+    await mkdir(ARTIFACT_DIR, { recursive: true });
+    const browser = await chromium.launch();
+    const { context, page, runtimeErrors } = await newPage(browser, IPHONE_14_PRO_LANDSCAPE);
+
+    try {
+      await page.goto(BASE_URL, { waitUntil: "networkidle" });
+      await page.evaluate(() => localStorage.clear());
+      await page.reload({ waitUntil: "networkidle" });
+
+      for (const label of ["Диктовка", "Журнал", "Пасека"]) {
+        await page.getByRole("button", { name: label }).click();
+        await assertNoHorizontalOverflow(page);
+        await assertTouchTargets(page);
+        await assertPageAtTop(page);
+      }
+
+      await page.screenshot({ path: `${ARTIFACT_DIR}/iphone-14-pro-landscape.png`, fullPage: true });
+      assert.deepEqual(runtimeErrors, []);
+    } finally {
+      await context.close();
+      await browser.close();
+    }
+  });
+});
+
+test("iPhone 14 Pro handles missing microphone support with manual entry", async () => {
+  await withServer(async () => {
+    const browser = await chromium.launch();
+    const { context, page, runtimeErrors } = await newPage(browser, IPHONE_14_PRO, { mockMediaRecorder: false });
+
+    try {
+      await page.goto(BASE_URL, { waitUntil: "networkidle" });
+      await page.evaluate(() => localStorage.clear());
+      await page.reload({ waitUntil: "networkidle" });
+
+      await page.getByRole("button", { name: "Диктовать" }).click();
+      await assert.equal(
+        await page.getByText("Запись голоса не поддерживается в этом браузере. Используйте текстовое поле.").isVisible(),
+        true
+      );
+      await page.getByLabel("Сделано").fill("Проверил семью без диктовки");
+      await page.getByRole("button", { name: "Сохранить запись" }).click();
+      await waitForText(page.locator("section[aria-labelledby='history-title'] .section-head span"), "1");
+      await assert.equal(await page.getByText("Проверил семью без диктовки").isVisible(), true);
+      assert.deepEqual(runtimeErrors, []);
+    } finally {
+      await context.close();
+      await browser.close();
+    }
+  });
+});
+
+test("iPhone 14 Pro protects hive deletion edge cases", async () => {
+  await withServer(async () => {
+    const browser = await chromium.launch();
+    const { context, page, runtimeErrors } = await newPage(browser, IPHONE_14_PRO);
+
+    try {
+      await page.goto(BASE_URL, { waitUntil: "networkidle" });
+      await page.evaluate(() => {
+        localStorage.setItem(
+          "imker-pwa-state-v1",
+          JSON.stringify({
+            hives: [{ id: "hive-1", name: "1" }],
+            notes: []
+          })
+        );
+      });
+      await page.reload({ waitUntil: "networkidle" });
+      await page.getByRole("button", { name: "Пасека" }).click();
+
+      page.on("dialog", (dialog) => {
+        throw new Error(`Unexpected dialog for last hive deletion: ${dialog.message()}`);
+      });
+      await page.getByRole("button", { name: "Удалить улей 1" }).click();
+      await assert.equal(await page.getByText("Нельзя удалить последний улей.").isVisible(), true);
+      await assert.equal(await page.getByRole("button", { name: "1", exact: true }).isVisible(), true);
       assert.deepEqual(runtimeErrors, []);
     } finally {
       await context.close();
@@ -193,7 +293,7 @@ test("desktop layout keeps controls visible", async () => {
   await withServer(async () => {
     await mkdir(ARTIFACT_DIR, { recursive: true });
     const browser = await chromium.launch();
-    const { context, page, runtimeErrors } = await newPage(browser, { width: 1440, height: 960 });
+    const { context, page, runtimeErrors } = await newPage(browser, DESKTOP);
 
     try {
       await page.goto(BASE_URL, { waitUntil: "networkidle" });
@@ -272,18 +372,28 @@ async function assertInViewport(locator) {
   assert.ok(box.y >= 0 && box.y + box.height <= viewport.height, `Element is outside viewport: ${JSON.stringify(box)}`);
 }
 
+async function assertNotCoveredByBottomNav(locator) {
+  const [box, navBox] = await Promise.all([
+    locator.boundingBox(),
+    locator.page().locator(".bottom-nav").boundingBox()
+  ]);
+  assert.ok(box, "Expected element to have a bounding box");
+  assert.ok(navBox, "Expected bottom navigation to have a bounding box");
+  assert.ok(box.y + box.height <= navBox.y, `Element overlaps bottom nav: ${JSON.stringify({ box, navBox })}`);
+}
+
 async function assertPageAtTop(page) {
   await page.waitForFunction(() => window.scrollY === 0);
   assert.equal(await page.evaluate(() => window.scrollY), 0);
 }
 
 async function assertNoWrappedHiveTiles(page) {
-  const wrappingTiles = await page.locator("[data-hive-id] button:first-child").evaluateAll((buttons) =>
-    buttons
-      .map((button) => {
-        const style = window.getComputedStyle(button);
+  const wrappingTiles = await page.locator("[data-hive-id] button span:first-child").evaluateAll((labels) =>
+    labels
+      .map((label) => {
+        const style = window.getComputedStyle(label);
         return {
-          label: button.textContent?.trim(),
+          label: label.textContent?.trim(),
           overflow: style.overflow,
           textOverflow: style.textOverflow,
           whiteSpace: style.whiteSpace

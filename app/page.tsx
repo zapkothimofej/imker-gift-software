@@ -179,6 +179,7 @@ export default function Home() {
         <HiveSelector
           error={hiveManager.hiveError}
           hives={hiveManager.hives}
+          notes={notes}
           newHiveName={hiveManager.newHiveName}
           onAddHive={hiveManager.addHive}
           onNewHiveNameChange={hiveManager.setNewHiveName}
@@ -269,25 +270,25 @@ export default function Home() {
 
       <nav className="bottom-nav" aria-label="Основные разделы">
         <button
-          aria-current={activeView === "hives" ? "page" : undefined}
-          onClick={() => setActiveView("hives")}
+          aria-current={activeView === "notes" ? "page" : undefined}
+          onClick={() => setActiveView("notes")}
           type="button"
         >
-          Пасека
+          Журнал
         </button>
         <button
           aria-current={activeView === "record" ? "page" : undefined}
           onClick={() => setActiveView("record")}
           type="button"
         >
-          Новая
+          Диктовка
         </button>
         <button
-          aria-current={activeView === "notes" ? "page" : undefined}
-          onClick={() => setActiveView("notes")}
+          aria-current={activeView === "hives" ? "page" : undefined}
+          onClick={() => setActiveView("hives")}
           type="button"
         >
-          Журнал
+          Пасека
         </button>
       </nav>
     </main>

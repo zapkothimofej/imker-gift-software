@@ -190,9 +190,6 @@ h1 {
 }
 
 .save-button {
-  position: sticky;
-  bottom: calc(76px + env(safe-area-inset-bottom));
-  z-index: 4;
   min-height: 48px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -374,9 +371,6 @@ textarea:focus {
     grid-template-columns: 1fr 1fr;
   }
 
-  .save-button {
-    position: static;
-  }
 }
 
 @keyframes panel-rise {

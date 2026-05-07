@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
-import type { Hive } from "../lib/hive-state";
+import { formatDate, type Hive, type Note } from "../lib/hive-state";
 import styles from "./hive-selector.module.css";
 
 type HiveSelectorProps = {
   error: string;
   hives: Hive[];
+  notes: Note[];
   newHiveName: string;
   selectedHive: Hive | undefined;
   selectedHiveId: string;
@@ -16,9 +17,17 @@ type HiveSelectorProps = {
   onSelectHive: (hiveId: string) => void;
 };
 
+function formatNoteCount(count: number) {
+  if (count === 0) return "нет записей";
+  if (count % 10 === 1 && count % 100 !== 11) return `${count} запись`;
+  if ([2, 3, 4].includes(count % 10) && ![12, 13, 14].includes(count % 100)) return `${count} записи`;
+  return `${count} записей`;
+}
+
 export function HiveSelector({
   error,
   hives,
+  notes,
   newHiveName,
   selectedHive,
   selectedHiveId,
@@ -44,16 +53,28 @@ export function HiveSelector({
     onRenameHive(selectedHive.id, renameName);
   }
 
+  function getHiveSummary(hiveId: string) {
+    const hiveNotes = notes.filter((note) => note.hiveId === hiveId);
+    const latestNote = hiveNotes.reduce<Note | undefined>(
+      (latest, note) =>
+        !latest || new Date(note.createdAt).getTime() > new Date(latest.createdAt).getTime() ? note : latest,
+      undefined
+    );
+
+    return {
+      count: hiveNotes.length,
+      latest: latestNote ? formatDate(latestNote.createdAt) : ""
+    };
+  }
+
+  const selectedHiveSummary = selectedHive ? getHiveSummary(selectedHive.id) : { count: 0, latest: "" };
+
   function findHiveIdAtPoint(clientX: number, clientY: number) {
     const target = document.elementFromPoint(clientX, clientY);
     return target instanceof HTMLElement ? target.closest<HTMLElement>("[data-hive-id]")?.dataset.hiveId : undefined;
   }
 
   function handlePointerDown(event: PointerEvent<HTMLDivElement>, hiveId: string) {
-    if (event.target instanceof HTMLElement && event.target.closest("button[aria-label^='Удалить']")) {
-      return;
-    }
-
     dragStartRef.current = { hiveId, x: event.clientX, y: event.clientY };
     didDragRef.current = false;
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -97,35 +118,40 @@ export function HiveSelector({
         <span>{hives.length}</span>
       </div>
       <div className={styles.grid} role="list" aria-label="Ульи на пасеке">
-        {hives.map((hive) => (
-          <div
-            className={[
-              styles.tile,
-              hive.id === selectedHiveId ? styles.active : "",
-              hive.id === draggingHiveId ? styles.dragging : "",
-              hive.id === dropHiveId ? styles.dropTarget : ""
-            ].filter(Boolean).join(" ")}
-            data-hive-id={hive.id}
-            key={hive.id}
-            onPointerCancel={handlePointerUp}
-            onPointerDown={(event) => handlePointerDown(event, hive.id)}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            role="listitem"
-          >
-            <button className={styles.select} onClick={() => onSelectHive(hive.id)} type="button">
-              {hive.name}
-            </button>
-            <button
-              aria-label={`Удалить улей ${hive.name}`}
-              className={styles.delete}
-              onClick={() => onRemoveHive(hive.id)}
-              type="button"
+        {hives.map((hive) => {
+          const summary = getHiveSummary(hive.id);
+
+          return (
+            <div
+              className={[
+                styles.tile,
+                hive.id === selectedHiveId ? styles.active : "",
+                hive.id === draggingHiveId ? styles.dragging : "",
+                hive.id === dropHiveId ? styles.dropTarget : ""
+              ].filter(Boolean).join(" ")}
+              data-hive-id={hive.id}
+              key={hive.id}
+              onPointerCancel={handlePointerUp}
+              onPointerDown={(event) => handlePointerDown(event, hive.id)}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              role="listitem"
             >
-              ×
-            </button>
-          </div>
-        ))}
+              <button
+                aria-current={hive.id === selectedHiveId ? "true" : undefined}
+                aria-label={hive.name}
+                className={styles.select}
+                onClick={() => onSelectHive(hive.id)}
+                type="button"
+              >
+                <span className={styles.hiveName}>{hive.name}</span>
+                <span aria-hidden="true" className={styles.hiveMeta}>
+                  {formatNoteCount(summary.count)}
+                </span>
+              </button>
+            </div>
+          );
+        })}
       </div>
       <div className={styles.addRow}>
         <input
@@ -142,21 +168,44 @@ export function HiveSelector({
           Добавить
         </button>
       </div>
-      <div className={styles.renameRow}>
-        <span className={styles.renameLabel}>Выбранный улей</span>
-        <input
-          aria-label="Переименовать выбранный улей"
-          inputMode="text"
-          onChange={(event) => setRenameName(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") submitRename();
-          }}
-          value={renameName}
-        />
-        <button className={styles.renameButton} onClick={submitRename} type="button">
-          Переименовать
-        </button>
-      </div>
+      {selectedHive ? (
+        <div className={styles.detailCard}>
+          <div className={styles.detailHead}>
+            <div>
+              <span className={styles.renameLabel}>Выбранный улей</span>
+              <h3>Улей {selectedHive.name}</h3>
+            </div>
+            <span className={styles.detailCount}>
+              {formatNoteCount(selectedHiveSummary.count)}
+            </span>
+          </div>
+          {selectedHiveSummary.latest ? (
+            <p className={styles.latestNote}>Последняя запись: {selectedHiveSummary.latest}</p>
+          ) : null}
+          <div className={styles.renameRow}>
+            <input
+              aria-label="Переименовать выбранный улей"
+              inputMode="text"
+              onChange={(event) => setRenameName(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") submitRename();
+              }}
+              value={renameName}
+            />
+            <button className={styles.renameButton} onClick={submitRename} type="button">
+              Переименовать
+            </button>
+            <button
+              aria-label={`Удалить улей ${selectedHive.name}`}
+              className={styles.deleteButton}
+              onClick={() => onRemoveHive(selectedHive.id)}
+              type="button"
+            >
+              Удалить
+            </button>
+          </div>
+        </div>
+      ) : null}
       {error ? <p className="error compact">{error}</p> : null}
     </section>
   );

@@ -5,9 +5,8 @@
 }
 
 .tile {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 44px;
-  min-height: 52px;
+  display: block;
+  min-height: 64px;
   overflow: hidden;
   border: 1px solid #dfd2b1;
   border-radius: 8px;
@@ -22,62 +21,102 @@
 }
 
 .active {
-  border-color: #8d5d00;
-  background: #f5c542;
+  border-color: #d59a17;
+  background: #fff5d6;
   color: #211601;
-  transform: translateY(-1px);
+  box-shadow: inset 0 0 0 1px rgba(213, 154, 23, 0.48);
 }
 
-.select,
-.delete {
+.select {
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  width: 100%;
   min-width: 0;
-  min-height: 52px;
+  min-height: 64px;
   border: 0;
+  padding: 8px 10px;
   background: transparent;
   color: #1d1a13;
   cursor: pointer;
+  text-align: left;
   transition:
     background-color 160ms ease,
     color 160ms ease;
 }
 
-.select {
+.hiveName {
+  display: block;
   font-size: 1.2rem;
   font-weight: 800;
   line-height: 1.15;
   overflow: hidden;
-  padding: 0 8px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.delete {
-  border-left: 1px solid rgba(102, 93, 74, 0.22);
+.hiveMeta {
   color: #665d4a;
-  font-size: 1.2rem;
-  font-weight: 900;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.delete:active {
-  background: rgba(162, 51, 45, 0.1);
-  color: #a2332d;
-}
-
-.addRow,
-.renameRow {
+.addRow {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
   margin-top: 12px;
 }
 
-.renameRow {
-  grid-template-columns: 1fr;
-  margin-top: 8px;
-  padding: 10px;
-  border: 1px solid rgba(223, 210, 177, 0.7);
+.detailCard {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid rgba(223, 210, 177, 0.76);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.52);
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.detailHead {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.detailHead h3 {
+  margin-top: 2px;
+  font-size: 1.28rem;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.detailCount {
+  min-height: 28px;
+  border-radius: 999px;
+  padding: 5px 9px;
+  background: #eee8d8;
+  color: #665d4a;
+  font-size: 0.78rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.latestNote {
+  color: #665d4a;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.renameRow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
 }
 
 .renameLabel {
@@ -97,7 +136,8 @@
 }
 
 .addButton,
-.renameButton {
+.renameButton,
+.deleteButton {
   min-height: 48px;
   border-radius: 8px;
   padding: 0 14px;
@@ -123,6 +163,12 @@
   color: #665d4a;
 }
 
+.deleteButton {
+  background: #fff8f6;
+  border-color: rgba(162, 51, 45, 0.26);
+  color: #a2332d;
+}
+
 .addButton:hover {
   background: #f1bc33;
 }
@@ -132,8 +178,14 @@
   color: #1d1a13;
 }
 
+.deleteButton:hover {
+  border-color: rgba(162, 51, 45, 0.5);
+  background: #fff1ee;
+}
+
 .addButton:active,
-.renameButton:active {
+.renameButton:active,
+.deleteButton:active {
   transform: translateY(1px);
 }
 
@@ -151,9 +203,9 @@
 @media (prefers-reduced-motion: reduce) {
   .tile,
   .select,
-  .delete,
   .addButton,
-  .renameButton {
+  .renameButton,
+  .deleteButton {
     transition: none;
   }
 
@@ -167,17 +219,14 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .active {
-    grid-column: span 2;
-  }
-
   .addRow,
   .renameRow {
     grid-template-columns: 1fr;
   }
 
   .addButton,
-  .renameButton {
+  .renameButton,
+  .deleteButton {
     width: 100%;
   }
 }
