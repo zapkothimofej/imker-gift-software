@@ -1,0 +1,19 @@
+{
+  "name": "Пасека",
+  "short_name": "Пасека",
+  "description": "Быстрые записи по ульям",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f4e7",
+  "theme_color": "#f5c542",
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
+

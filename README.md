@@ -11,6 +11,16 @@ Der aktuelle Stand ist bewusst ein Discovery- und Planungsgeruest. Der konkrete 
 - Offline-, Wetter-, Standort-, Datenschutz- und Bedienbarkeitsfragen frueh klaeren.
 - Danach einen kleinen, stabilen MVP schneiden.
 
+## MVP-Stand
+
+- Russische PWA fuer das iPhone.
+- Startbestand: Stoecke `1` bis `8`.
+- Neue Stoecke koennen angelegt werden.
+- Pro Stock werden `Сделано` und `В следующий раз` gespeichert.
+- Notizen bleiben im lokalen Speicher des Handys.
+- Spracheingabe laeuft ueber eine Server-Route zu ElevenLabs Speech-to-Text.
+- Der ElevenLabs-Key liegt nur in `ELEVENLABS_API_KEY`, nicht im Browser-Code.
+
 ## Projektstruktur
 
 - `docs/QUESTIONS.md` - priorisierte Fragenliste fuer die Produktklaerung.
@@ -22,6 +32,16 @@ Der aktuelle Stand ist bewusst ein Discovery- und Planungsgeruest. Der konkrete 
 ## Lokale Checks
 
 ```bash
+npm install
 npm test
+npm run lint
+npm run build
 ```
 
+## Environment
+
+```bash
+cp .env.local.example .env.local
+```
+
+Danach `ELEVENLABS_API_KEY` setzen.
