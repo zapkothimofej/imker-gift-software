@@ -1,76 +1,68 @@
 .notes {
   display: grid;
-  gap: 0;
+  gap: 10px;
 }
 
 .note {
   display: grid;
-  grid-template-columns: 34px 1fr;
-  gap: 10px;
-  position: relative;
-  padding-bottom: 14px;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #d8ceb0;
+  border-radius: 8px;
+  background: #ffffff;
   animation: note-in 180ms ease both;
 }
 
-.note:not(:last-child)::before {
-  position: absolute;
-  top: 34px;
-  bottom: 0;
-  left: 16px;
-  width: 2px;
-  background: #dfd2b1;
-  content: "";
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
-.marker {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
-  background: #1d1a13;
-  color: #fff;
-  font-size: 0.84rem;
+.header span {
+  color: #1d1a13;
+  font-size: 0.92rem;
   font-weight: 900;
 }
 
-.body {
-  padding: 12px;
-  border: 1px solid #dfd2b1;
-  border-radius: 8px;
-  background: #ffffff;
-}
-
-.body time {
-  display: block;
-  margin-bottom: 9px;
+.header time {
   color: #665d4a;
-  font-size: 0.86rem;
+  font-size: 0.82rem;
+  text-align: right;
 }
 
-.columns {
+.body,
+.sections {
   display: grid;
-  gap: 9px;
+  gap: 8px;
 }
 
-.columns section {
-  padding-top: 8px;
-  border-top: 1px solid #eee2c3;
+.block {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid #e4dac0;
+  border-radius: 8px;
+  background: #fffdf8;
 }
 
-.columns h3 {
+.next {
+  border-color: rgba(47, 125, 80, 0.28);
+  background: rgba(47, 125, 80, 0.08);
+}
+
+.block h3 {
+  color: #665d4a;
   font-size: 0.92rem;
 }
 
-.columns p {
-  margin-top: 4px;
+.block p {
   line-height: 1.45;
 }
 
 @media (min-width: 700px) {
-  .columns {
+  .sections {
     grid-template-columns: 1fr 1fr;
   }
 }

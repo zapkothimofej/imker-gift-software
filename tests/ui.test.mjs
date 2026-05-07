@@ -148,6 +148,8 @@ test("mobile gift flow is usable without layout or runtime regressions", async (
       await assertPageAtTop(page);
       await assert.equal(await page.getByText("Осмотрел рамки").isVisible(), true);
       await assert.equal(await page.getByText("матка есть").isVisible(), true);
+      await assert.equal(await page.getByText("Запись 1").isVisible(), true);
+      await page.screenshot({ path: `${ARTIFACT_DIR}/mobile-history.png`, fullPage: true });
 
       await page.getByRole("button", { name: "Пасека" }).click();
       await assert.equal(await page.locator("h1").textContent(), "Пасека");

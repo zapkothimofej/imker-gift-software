@@ -5,7 +5,7 @@
   --surface-strong: #ffffff;
   --text: #1d1a13;
   --muted: #665d4a;
-  --line: #dfd2b1;
+  --line: #d8ceb0;
   --accent: #c98b0a;
   --accent-strong: #7a5200;
   --good: #2f7d50;
@@ -27,7 +27,7 @@ body {
   min-height: 100%;
   color: var(--text);
   background:
-    linear-gradient(180deg, rgba(245, 197, 66, 0.2), transparent 230px),
+    linear-gradient(180deg, rgba(245, 197, 66, 0.14), transparent 220px),
     radial-gradient(circle at 92% 12%, rgba(47, 125, 80, 0.12), transparent 190px),
     var(--bg);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -222,7 +222,7 @@ h1 {
   padding: 5px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #efe5c9;
+  background: #eee8d8;
 }
 
 .segmented button {
@@ -295,9 +295,9 @@ h1 {
 }
 
 .entry-field.active {
-  border-color: var(--accent);
+  border-color: rgba(47, 125, 80, 0.62);
   background: #fffef8;
-  box-shadow: inset 0 0 0 1px rgba(216, 153, 19, 0.3);
+  box-shadow: inset 0 0 0 1px rgba(47, 125, 80, 0.18);
 }
 
 .entry-field span {
@@ -307,7 +307,7 @@ h1 {
   min-height: 30px;
   border-radius: 999px;
   padding: 0 10px;
-  background: #efe5c9;
+  background: #eee8d8;
   color: var(--text);
   font-size: 0.94rem;
 }
@@ -335,8 +335,8 @@ textarea::placeholder {
 }
 
 textarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(216, 153, 19, 0.16);
+  border-color: rgba(47, 125, 80, 0.75);
+  box-shadow: 0 0 0 3px rgba(47, 125, 80, 0.13);
 }
 
 .error {

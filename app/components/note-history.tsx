@@ -14,22 +14,22 @@ export function NoteHistory({ notes }: NoteHistoryProps) {
     <div className={styles.notes}>
       {notes.map((note, index) => (
         <article className={styles.note} key={note.id}>
-          <div className={styles.marker} aria-hidden="true">
-            <span>{notes.length - index}</span>
-          </div>
-          <div className={styles.body}>
+          <header className={styles.header}>
+            <span>Запись {notes.length - index}</span>
             <time>{formatDate(note.createdAt)}</time>
-            <div className={styles.columns}>
-              {note.done ? (
-                <section>
-                  <h3>Сделано</h3>
-                  <p>{note.done}</p>
-                </section>
-              ) : null}
+          </header>
+          <div className={styles.body}>
+            <div className={styles.sections}>
               {note.next ? (
-                <section>
+                <section className={`${styles.block} ${styles.next}`}>
                   <h3>Следующий осмотр</h3>
                   <p>{note.next}</p>
+                </section>
+              ) : null}
+              {note.done ? (
+                <section className={styles.block}>
+                  <h3>Сделано</h3>
+                  <p>{note.done}</p>
                 </section>
               ) : null}
             </div>
