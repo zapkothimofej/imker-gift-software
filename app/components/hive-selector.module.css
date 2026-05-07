@@ -12,6 +12,9 @@
   border: 1px solid #dfd2b1;
   border-radius: 8px;
   background: #ffffff;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
   transition:
     border-color 160ms ease,
     background-color 160ms ease,
@@ -56,24 +59,13 @@
 }
 
 .addRow,
-.renameRow,
-.orderRow {
+.renameRow {
   display: grid;
   gap: 8px;
   margin-top: 12px;
 }
 
-.addRow,
 .renameRow {
-  grid-template-columns: 1fr auto;
-}
-
-.renameRow {
-  margin-top: 8px;
-}
-
-.orderRow {
-  grid-template-columns: 1fr 1fr;
   margin-top: 8px;
 }
 
@@ -88,8 +80,7 @@
 }
 
 .addRow button,
-.renameRow button,
-.orderRow button {
+.renameRow button {
   min-height: 48px;
   border-radius: 8px;
   padding: 0 16px;
@@ -102,16 +93,19 @@
 }
 
 .addRow button:active,
-.renameRow button:active,
-.orderRow button:active {
+.renameRow button:active {
   transform: translateY(1px);
 }
 
-.orderRow button:disabled {
-  background: #d8cfba;
-  color: #786f5c;
-  cursor: not-allowed;
-  transform: none;
+.dragging {
+  cursor: grabbing;
+  opacity: 0.72;
+  transform: scale(0.98);
+}
+
+.dropTarget {
+  border-color: #2f7d50;
+  box-shadow: inset 0 0 0 2px rgba(47, 125, 80, 0.22);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -119,8 +113,7 @@
   .select,
   .delete,
   .addRow button,
-  .renameRow button,
-  .orderRow button {
+  .renameRow button {
     transition: none;
   }
 

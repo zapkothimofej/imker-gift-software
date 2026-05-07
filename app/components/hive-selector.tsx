@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type PointerEvent } from "react";
 import type { Hive } from "../lib/hive-state";
 import styles from "./hive-selector.module.css";
 
@@ -9,8 +9,8 @@ type HiveSelectorProps = {
   selectedHive: Hive | undefined;
   selectedHiveId: string;
   onAddHive: () => void;
-  onMoveHive: (hiveId: string, direction: -1 | 1) => void;
   onNewHiveNameChange: (name: string) => void;
+  onReorderHive: (hiveId: string, targetHiveId: string) => void;
   onRemoveHive: (hiveId: string) => void;
   onRenameHive: (hiveId: string, name: string) => void;
   onSelectHive: (hiveId: string) => void;
@@ -23,13 +23,17 @@ export function HiveSelector({
   selectedHive,
   selectedHiveId,
   onAddHive,
-  onMoveHive,
   onNewHiveNameChange,
+  onReorderHive,
   onRemoveHive,
   onRenameHive,
   onSelectHive
 }: HiveSelectorProps) {
   const [renameName, setRenameName] = useState(selectedHive?.name ?? "");
+  const [draggingHiveId, setDraggingHiveId] = useState("");
+  const [dropHiveId, setDropHiveId] = useState("");
+  const dragStartRef = useRef<{ hiveId: string; x: number; y: number } | null>(null);
+  const didDragRef = useRef(false);
 
   useEffect(() => {
     setRenameName(selectedHive?.name ?? "");
@@ -40,9 +44,51 @@ export function HiveSelector({
     onRenameHive(selectedHive.id, renameName);
   }
 
-  const selectedIndex = hives.findIndex((hive) => hive.id === selectedHiveId);
-  const canMoveEarlier = selectedIndex > 0;
-  const canMoveLater = selectedIndex >= 0 && selectedIndex < hives.length - 1;
+  function findHiveIdAtPoint(clientX: number, clientY: number) {
+    const target = document.elementFromPoint(clientX, clientY);
+    return target instanceof HTMLElement ? target.closest<HTMLElement>("[data-hive-id]")?.dataset.hiveId : undefined;
+  }
+
+  function handlePointerDown(event: PointerEvent<HTMLDivElement>, hiveId: string) {
+    if (event.target instanceof HTMLElement && event.target.closest("button[aria-label^='Удалить']")) {
+      return;
+    }
+
+    dragStartRef.current = { hiveId, x: event.clientX, y: event.clientY };
+    didDragRef.current = false;
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
+    const dragStart = dragStartRef.current;
+    if (!dragStart) return;
+
+    const distance = Math.hypot(event.clientX - dragStart.x, event.clientY - dragStart.y);
+    if (distance < 8 && !didDragRef.current) return;
+
+    didDragRef.current = true;
+    setDraggingHiveId(dragStart.hiveId);
+
+    const targetHiveId = findHiveIdAtPoint(event.clientX, event.clientY);
+    setDropHiveId(targetHiveId && targetHiveId !== dragStart.hiveId ? targetHiveId : "");
+  }
+
+  function handlePointerUp(event: PointerEvent<HTMLDivElement>) {
+    const dragStart = dragStartRef.current;
+    if (!dragStart) return;
+
+    const targetHiveId = findHiveIdAtPoint(event.clientX, event.clientY) ?? dropHiveId;
+    if (didDragRef.current && targetHiveId && targetHiveId !== dragStart.hiveId) {
+      onReorderHive(dragStart.hiveId, targetHiveId);
+    } else if (!didDragRef.current) {
+      onSelectHive(dragStart.hiveId);
+    }
+
+    dragStartRef.current = null;
+    didDragRef.current = false;
+    setDraggingHiveId("");
+    setDropHiveId("");
+  }
 
   return (
     <section className="panel" aria-labelledby="hive-title">
@@ -52,7 +98,21 @@ export function HiveSelector({
       </div>
       <div className={styles.grid} role="list" aria-label="Список ульев">
         {hives.map((hive) => (
-          <div className={hive.id === selectedHiveId ? `${styles.tile} ${styles.active}` : styles.tile} key={hive.id} role="listitem">
+          <div
+            className={[
+              styles.tile,
+              hive.id === selectedHiveId ? styles.active : "",
+              hive.id === draggingHiveId ? styles.dragging : "",
+              hive.id === dropHiveId ? styles.dropTarget : ""
+            ].filter(Boolean).join(" ")}
+            data-hive-id={hive.id}
+            key={hive.id}
+            onPointerCancel={handlePointerUp}
+            onPointerDown={(event) => handlePointerDown(event, hive.id)}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            role="listitem"
+          >
             <button className={styles.select} onClick={() => onSelectHive(hive.id)} type="button">
               {hive.name}
             </button>
@@ -94,22 +154,6 @@ export function HiveSelector({
         />
         <button onClick={submitRename} type="button">
           Переименовать
-        </button>
-      </div>
-      <div className={styles.orderRow}>
-        <button
-          disabled={!selectedHive || !canMoveEarlier}
-          onClick={() => selectedHive && onMoveHive(selectedHive.id, -1)}
-          type="button"
-        >
-          ← Раньше
-        </button>
-        <button
-          disabled={!selectedHive || !canMoveLater}
-          onClick={() => selectedHive && onMoveHive(selectedHive.id, 1)}
-          type="button"
-        >
-          Позже →
         </button>
       </div>
       {error ? <p className="error compact">{error}</p> : null}

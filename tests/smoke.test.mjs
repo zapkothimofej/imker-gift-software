@@ -47,13 +47,15 @@ test("hive management prevents duplicates and supports deletion", async () => {
   assert.match(hook, /Улей с таким номером уже есть/);
   assert.match(hook, /function removeHive/);
   assert.match(hook, /function renameHive/);
-  assert.match(hook, /function moveHive/);
+  assert.match(hook, /function reorderHive/);
   assert.match(hook, /window\.confirm/);
   assert.match(hook, /Порядок изменен/);
   assert.match(selector, /Удалить улей/);
   assert.match(selector, /Переименовать/);
-  assert.match(selector, /Раньше/);
-  assert.match(selector, /Позже/);
+  assert.match(selector, /onPointerDown/);
+  assert.match(selector, /data-hive-id/);
+  assert.doesNotMatch(selector, /Раньше/);
+  assert.doesNotMatch(selector, /Позже/);
   assert.match(hook, /Нельзя удалить последний улей/);
 });
 

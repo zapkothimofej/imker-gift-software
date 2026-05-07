@@ -100,23 +100,16 @@ export function useHiveManager({ notes, setNotes, setStatus }: UseHiveManagerPro
     setStatus("Улей удален");
   }
 
-  function moveHive(hiveId: string, direction: -1 | 1) {
+  function reorderHive(hiveId: string, targetHiveId: string) {
     const currentIndex = hives.findIndex((hive) => hive.id === hiveId);
-    const nextIndex = currentIndex + direction;
+    const targetIndex = hives.findIndex((hive) => hive.id === targetHiveId);
 
-    if (currentIndex < 0) return;
-
-    if (nextIndex < 0 || nextIndex >= hives.length) {
-      setHiveError(direction < 0 ? "Этот улей уже первый." : "Этот улей уже последний.");
-      return;
-    }
+    if (currentIndex < 0 || targetIndex < 0 || currentIndex === targetIndex) return;
 
     setHives((current) => {
       const reordered = [...current];
-      [reordered[currentIndex], reordered[nextIndex]] = [
-        reordered[nextIndex],
-        reordered[currentIndex]
-      ];
+      const [movedHive] = reordered.splice(currentIndex, 1);
+      reordered.splice(targetIndex, 0, movedHive);
       return reordered;
     });
     setHiveError("");
@@ -128,8 +121,8 @@ export function useHiveManager({ notes, setNotes, setStatus }: UseHiveManagerPro
     hiveError,
     hiveNotes,
     hives,
-    moveHive,
     newHiveName,
+    reorderHive,
     removeHive,
     renameHive,
     selectedHive,
