@@ -93,10 +93,10 @@ export function HiveSelector({
   return (
     <section className="panel" aria-labelledby="hive-title">
       <div className="section-head">
-        <h2 id="hive-title">Ульи</h2>
+        <h2 id="hive-title">Пасека</h2>
         <span>{hives.length}</span>
       </div>
-      <div className={styles.grid} role="list" aria-label="Список ульев">
+      <div className={styles.grid} role="list" aria-label="Ульи на пасеке">
         {hives.map((hive) => (
           <div
             className={[

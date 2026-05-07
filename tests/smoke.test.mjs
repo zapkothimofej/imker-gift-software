@@ -45,9 +45,9 @@ test("pwa is configured for Russian phone usage", async () => {
   );
   assert.match(layout, /apple-touch-icon\.png/);
   assert.match(layout, /appleWebApp/);
-  assert.match(page, /Говорить/);
+  assert.match(page, /Диктовать/);
   assert.match(page, /Сделано/);
-  assert.match(page, /В следующий раз/);
+  assert.match(page, /Следующий осмотр/);
 });
 
 test("gift handover documents final phone checks", async () => {

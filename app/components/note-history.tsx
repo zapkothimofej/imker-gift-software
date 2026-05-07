@@ -28,7 +28,7 @@ export function NoteHistory({ notes }: NoteHistoryProps) {
               ) : null}
               {note.next ? (
                 <section>
-                  <h3>В следующий раз</h3>
+                  <h3>Следующий осмотр</h3>
                   <p>{note.next}</p>
                 </section>
               ) : null}

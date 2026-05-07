@@ -12,6 +12,7 @@ export default function Home() {
   const [done, setDone] = useState("");
   const [next, setNext] = useState("");
   const [targetField, setTargetField] = useState<"done" | "next">("done");
+  const [activeView, setActiveView] = useState<"hives" | "record" | "notes">("record");
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [status, setStatus] = useState("Готово к записи");
@@ -69,6 +70,7 @@ export default function Home() {
     setNext("");
     setRecordError("");
     setStatus("Запись сохранена");
+    setActiveView("notes");
   }
 
   function appendTranscript(text: string) {
@@ -143,94 +145,137 @@ export default function Home() {
 
   return (
     <main className="shell">
-      <section className="hero" aria-labelledby="app-title">
+      <header className="app-header" aria-labelledby="app-title">
         <div>
           <p className="eyebrow">Пасека</p>
-          <h1 id="app-title">Записи по ульям</h1>
+          <h1 id="app-title">Журнал</h1>
         </div>
-        <p className="hero-text">Выберите улей, продиктуйте заметку и сохраните, что сделано и что нужно проверить в следующий раз.</p>
-      </section>
+        <label className="hive-switcher">
+          <span>Выбранный улей</span>
+          <select
+            aria-label="Выбранный улей"
+            onChange={(event) => hiveManager.setSelectedHiveId(event.target.value)}
+            value={hiveManager.selectedHiveId}
+          >
+            {hiveManager.hives.map((hive) => (
+              <option key={hive.id} value={hive.id}>
+                Улей {hive.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      </header>
 
-      <HiveSelector
-        error={hiveManager.hiveError}
-        hives={hiveManager.hives}
-        newHiveName={hiveManager.newHiveName}
-        onAddHive={hiveManager.addHive}
-        onNewHiveNameChange={hiveManager.setNewHiveName}
-        onReorderHive={hiveManager.reorderHive}
-        onRemoveHive={hiveManager.removeHive}
-        onRenameHive={hiveManager.renameHive}
-        onSelectHive={hiveManager.setSelectedHiveId}
-        selectedHive={hiveManager.selectedHive}
-        selectedHiveId={hiveManager.selectedHiveId}
-      />
+      {activeView === "hives" ? (
+        <HiveSelector
+          error={hiveManager.hiveError}
+          hives={hiveManager.hives}
+          newHiveName={hiveManager.newHiveName}
+          onAddHive={hiveManager.addHive}
+          onNewHiveNameChange={hiveManager.setNewHiveName}
+          onReorderHive={hiveManager.reorderHive}
+          onRemoveHive={hiveManager.removeHive}
+          onRenameHive={hiveManager.renameHive}
+          onSelectHive={hiveManager.setSelectedHiveId}
+          selectedHive={hiveManager.selectedHive}
+          selectedHiveId={hiveManager.selectedHiveId}
+        />
+      ) : null}
 
-      <section className="panel recorder" aria-labelledby="record-title">
-        <div className="section-head">
-          <h2 id="record-title">Улей {hiveManager.selectedHive?.name}</h2>
-          <span>{status}</span>
-        </div>
+      {activeView === "record" ? (
+        <section className="panel recorder" aria-labelledby="record-title">
+          <div className="section-head">
+            <h2 id="record-title">Улей {hiveManager.selectedHive?.name}</h2>
+            <span>{status}</span>
+          </div>
 
-        <div className="segmented" role="group" aria-label="Куда добавить диктовку">
+          <div className="segmented" role="group" aria-label="Раздел записи">
+            <button
+              className={targetField === "done" ? "active" : ""}
+              onClick={() => setTargetField("done")}
+              type="button"
+            >
+              Сделано
+            </button>
+            <button
+              className={targetField === "next" ? "active" : ""}
+              onClick={() => setTargetField("next")}
+              type="button"
+            >
+              Следующий осмотр
+            </button>
+          </div>
+
           <button
-            className={targetField === "done" ? "active" : ""}
-            onClick={() => setTargetField("done")}
+            className={recording ? "record-button recording" : "record-button"}
+            disabled={transcribing}
+            onClick={recording ? stopRecording : startRecording}
             type="button"
           >
-            Сделано
+            <VoiceWave active={recording || transcribing} />
+            <span>{recording ? "Остановить" : transcribing ? "Распознаю..." : "Диктовать"}</span>
           </button>
-          <button
-            className={targetField === "next" ? "active" : ""}
-            onClick={() => setTargetField("next")}
-            type="button"
-          >
-            В следующий раз
-          </button>
-        </div>
 
+          <div className="field-grid">
+            <label className={targetField === "done" ? "entry-field active" : "entry-field"}>
+              <span>Сделано</span>
+              <textarea
+                onChange={(event) => setDone(event.target.value)}
+                placeholder="Например: проверил рамки, добавил вощину..."
+                value={done}
+              />
+            </label>
+            <label className={targetField === "next" ? "entry-field active" : "entry-field"}>
+              <span>Следующий осмотр</span>
+              <textarea
+                onChange={(event) => setNext(event.target.value)}
+                placeholder="Например: проверить корм, посмотреть матку..."
+                value={next}
+              />
+            </label>
+          </div>
+
+          {recordError ? <p className="error">{recordError}</p> : null}
+
+          <button className="save-button" onClick={saveNote} type="button">
+            Сохранить запись
+          </button>
+        </section>
+      ) : null}
+
+      {activeView === "notes" ? (
+        <section className="panel" aria-labelledby="history-title">
+          <div className="section-head">
+            <h2 id="history-title">Журнал</h2>
+            <span>{hiveManager.hiveNotes.length}</span>
+          </div>
+          <NoteHistory notes={hiveManager.hiveNotes} />
+        </section>
+      ) : null}
+
+      <nav className="bottom-nav" aria-label="Основные разделы">
         <button
-          className={recording ? "record-button recording" : "record-button"}
-          disabled={transcribing}
-          onClick={recording ? stopRecording : startRecording}
+          aria-current={activeView === "hives" ? "page" : undefined}
+          onClick={() => setActiveView("hives")}
           type="button"
         >
-          <VoiceWave active={recording || transcribing} />
-          <span>{recording ? "Остановить" : transcribing ? "Распознаю..." : "Говорить"}</span>
+          Пасека
         </button>
-
-        <div className="field-grid">
-          <label className={targetField === "done" ? "entry-field active" : "entry-field"}>
-            <span>Сделано</span>
-            <textarea
-              onChange={(event) => setDone(event.target.value)}
-              placeholder="Например: проверил рамки, добавил вощину..."
-              value={done}
-            />
-          </label>
-          <label className={targetField === "next" ? "entry-field active" : "entry-field"}>
-            <span>В следующий раз</span>
-            <textarea
-              onChange={(event) => setNext(event.target.value)}
-              placeholder="Например: проверить корм, посмотреть матку..."
-              value={next}
-            />
-          </label>
-        </div>
-
-        {recordError ? <p className="error">{recordError}</p> : null}
-
-        <button className="save-button" onClick={saveNote} type="button">
-          Сохранить запись
+        <button
+          aria-current={activeView === "record" ? "page" : undefined}
+          onClick={() => setActiveView("record")}
+          type="button"
+        >
+          Новая
         </button>
-      </section>
-
-      <section className="panel" aria-labelledby="history-title">
-        <div className="section-head">
-          <h2 id="history-title">История</h2>
-          <span>{hiveManager.hiveNotes.length}</span>
-        </div>
-        <NoteHistory notes={hiveManager.hiveNotes} />
-      </section>
+        <button
+          aria-current={activeView === "notes" ? "page" : undefined}
+          onClick={() => setActiveView("notes")}
+          type="button"
+        >
+          Журнал
+        </button>
+      </nav>
     </main>
   );
 }

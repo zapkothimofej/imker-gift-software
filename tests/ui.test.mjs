@@ -127,10 +127,10 @@ test("mobile gift flow is usable without layout or runtime regressions", async (
       await assertTouchTargets(page);
       await page.screenshot({ path: `${ARTIFACT_DIR}/mobile-home.png`, fullPage: true });
 
-      await page.getByRole("button", { name: "В следующий раз" }).click();
-      await page.getByRole("button", { name: "Говорить" }).click();
+      await page.getByRole("button", { name: "Следующий осмотр" }).click();
+      await page.getByRole("button", { name: "Диктовать" }).click();
       await page.getByRole("button", { name: "Остановить" }).click();
-      const nextTextarea = page.locator("label.entry-field").filter({ hasText: "В следующий раз" }).locator("textarea");
+      const nextTextarea = page.locator("label.entry-field").filter({ hasText: "Следующий осмотр" }).locator("textarea");
       await waitForValue(nextTextarea, /матка есть/);
 
       await page.getByLabel("Сделано").fill("Осмотрел рамки");
@@ -139,12 +139,14 @@ test("mobile gift flow is usable without layout or runtime regressions", async (
       await assert.equal(await page.getByText("Осмотрел рамки").isVisible(), true);
 
       await page.reload({ waitUntil: "networkidle" });
+      await page.getByRole("button", { name: "Журнал" }).click();
       await assert.equal(await page.getByText("Осмотрел рамки").isVisible(), true);
       await assert.equal(await page.getByText("матка есть").isVisible(), true);
 
+      await page.getByRole("button", { name: "Пасека" }).click();
       await page.getByLabel("Название нового улья").fill("9");
       await page.getByRole("button", { name: "Добавить" }).click();
-      await assert.equal(await page.getByRole("heading", { name: "Улей 9" }).isVisible(), true);
+      await assert.equal(await selectedHiveLabel(page), "Улей 9");
 
       await page.getByLabel("Название нового улья").fill("9");
       await page.getByRole("button", { name: "Добавить" }).click();
@@ -152,7 +154,7 @@ test("mobile gift flow is usable without layout or runtime regressions", async (
 
       await page.getByLabel("Переименовать выбранный улей").fill("Северный 9");
       await page.getByRole("button", { name: "Переименовать" }).click();
-      await assert.equal(await page.getByRole("heading", { name: "Улей Северный 9" }).isVisible(), true);
+      await assert.equal(await selectedHiveLabel(page), "Улей Северный 9");
       await assertNoHorizontalOverflow(page);
 
       page.once("dialog", async (dialog) => {
@@ -228,8 +230,14 @@ async function waitForText(locator, expected, timeoutMs = 5000) {
   assert.equal(await locator.textContent(), expected);
 }
 
+async function selectedHiveLabel(page) {
+  return page.getByRole("combobox", { name: "Выбранный улей" }).evaluate((select) =>
+    select instanceof HTMLSelectElement ? select.selectedOptions[0]?.textContent?.trim() : ""
+  );
+}
+
 async function assertTouchTargets(page) {
-  const smallTargets = await page.locator("button, input, textarea").evaluateAll((elements) =>
+  const smallTargets = await page.locator("button, input, select, textarea").evaluateAll((elements) =>
     elements
       .map((element) => {
         const rect = element.getBoundingClientRect();
