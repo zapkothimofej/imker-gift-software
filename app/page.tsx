@@ -1,34 +1,24 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { HiveSelector } from "./components/hive-selector";
 import { NoteHistory } from "./components/note-history";
 import { VoiceWave } from "./components/voice-wave";
-import {
-  createId,
-  DEFAULT_HIVES,
-  initialState,
-  STORAGE_KEY,
-  type Hive,
-  type Note,
-  type StoredState
-} from "./lib/hive-state";
+import { useHiveManager } from "./hooks/use-hive-manager";
+import { createId, STORAGE_KEY, type Note, type StoredState } from "./lib/hive-state";
 
 export default function Home() {
-  const [hives, setHives] = useState<Hive[]>(initialState.hives);
-  const [notes, setNotes] = useState<Note[]>(initialState.notes);
-  const [selectedHiveId, setSelectedHiveId] = useState(DEFAULT_HIVES[0].id);
-  const [newHiveName, setNewHiveName] = useState("");
+  const [notes, setNotes] = useState<Note[]>([]);
   const [done, setDone] = useState("");
   const [next, setNext] = useState("");
   const [targetField, setTargetField] = useState<"done" | "next">("done");
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [status, setStatus] = useState("Готово к записи");
-  const [hiveError, setHiveError] = useState("");
   const [recordError, setRecordError] = useState("");
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const hiveManager = useHiveManager({ notes, setNotes, setStatus });
 
   useEffect(() => {
     const saved = window.localStorage.getItem(STORAGE_KEY);
@@ -37,18 +27,18 @@ export default function Home() {
     try {
       const parsed = JSON.parse(saved) as StoredState;
       if (Array.isArray(parsed.hives) && parsed.hives.length > 0) {
-        setHives(parsed.hives);
+        hiveManager.setHives(parsed.hives);
         setNotes(Array.isArray(parsed.notes) ? parsed.notes : []);
-        setSelectedHiveId(parsed.hives[0].id);
+        hiveManager.setSelectedHiveId(parsed.hives[0].id);
       }
     } catch {
-      setHiveError("Не удалось прочитать сохраненные данные.");
+      hiveManager.setHiveError("Не удалось прочитать сохраненные данные.");
     }
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ hives, notes }));
-  }, [hives, notes]);
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ hives: hiveManager.hives, notes }));
+  }, [hiveManager.hives, notes]);
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
@@ -56,67 +46,11 @@ export default function Home() {
     }
   }, []);
 
-  const selectedHive = hives.find((hive) => hive.id === selectedHiveId) ?? hives[0];
-  const hiveNotes = useMemo(
-    () => notes.filter((note) => note.hiveId === selectedHiveId),
-    [notes, selectedHiveId]
-  );
-
-  function normalizeHiveName(value: string) {
-    return value.trim().replace(/\s+/g, " ").toLowerCase();
-  }
-
-  function addHive() {
-    const name = newHiveName.trim();
-    if (!name) return;
-
-    const normalizedName = normalizeHiveName(name);
-    const alreadyExists = hives.some((hive) => normalizeHiveName(hive.name) === normalizedName);
-
-    if (alreadyExists) {
-      setHiveError("Улей с таким номером уже есть.");
-      return;
-    }
-
-    const hive = { id: createId("hive"), name };
-    setHives((current) => [...current, hive]);
-    setSelectedHiveId(hive.id);
-    setNewHiveName("");
-    setHiveError("");
-    setStatus("Улей добавлен");
-  }
-
-  function removeHive(hiveId: string) {
-    const hive = hives.find((current) => current.id === hiveId);
-    if (!hive) return;
-
-    if (hives.length <= 1) {
-      setHiveError("Нельзя удалить последний улей.");
-      return;
-    }
-
-    const hasNotes = notes.some((note) => note.hiveId === hiveId);
-    if (hasNotes && !window.confirm(`Удалить улей ${hive.name} и все его записи?`)) {
-      return;
-    }
-
-    const remainingHives = hives.filter((current) => current.id !== hiveId);
-    setHives(remainingHives);
-    setNotes((current) => current.filter((note) => note.hiveId !== hiveId));
-
-    if (selectedHiveId === hiveId) {
-      setSelectedHiveId(remainingHives[0].id);
-    }
-
-    setHiveError("");
-    setStatus("Улей удален");
-  }
-
   function saveNote() {
     const cleanDone = done.trim();
     const cleanNext = next.trim();
 
-    if (!selectedHive || (!cleanDone && !cleanNext)) {
+    if (!hiveManager.selectedHive || (!cleanDone && !cleanNext)) {
       setRecordError("Выберите улей и добавьте запись.");
       return;
     }
@@ -124,7 +58,7 @@ export default function Home() {
     setNotes((current) => [
       {
         id: createId("note"),
-        hiveId: selectedHive.id,
+        hiveId: hiveManager.selectedHive.id,
         done: cleanDone,
         next: cleanNext,
         createdAt: new Date().toISOString()
@@ -218,19 +152,21 @@ export default function Home() {
       </section>
 
       <HiveSelector
-        error={hiveError}
-        hives={hives}
-        newHiveName={newHiveName}
-        onAddHive={addHive}
-        onNewHiveNameChange={setNewHiveName}
-        onRemoveHive={removeHive}
-        onSelectHive={setSelectedHiveId}
-        selectedHiveId={selectedHiveId}
+        error={hiveManager.hiveError}
+        hives={hiveManager.hives}
+        newHiveName={hiveManager.newHiveName}
+        onAddHive={hiveManager.addHive}
+        onNewHiveNameChange={hiveManager.setNewHiveName}
+        onRemoveHive={hiveManager.removeHive}
+        onRenameHive={hiveManager.renameHive}
+        onSelectHive={hiveManager.setSelectedHiveId}
+        selectedHive={hiveManager.selectedHive}
+        selectedHiveId={hiveManager.selectedHiveId}
       />
 
       <section className="panel recorder" aria-labelledby="record-title">
         <div className="section-head">
-          <h2 id="record-title">Улей {selectedHive?.name}</h2>
+          <h2 id="record-title">Улей {hiveManager.selectedHive?.name}</h2>
           <span>{status}</span>
         </div>
 
@@ -290,9 +226,9 @@ export default function Home() {
       <section className="panel" aria-labelledby="history-title">
         <div className="section-head">
           <h2 id="history-title">История</h2>
-          <span>{hiveNotes.length}</span>
+          <span>{hiveManager.hiveNotes.length}</span>
         </div>
-        <NoteHistory notes={hiveNotes} />
+        <NoteHistory notes={hiveManager.hiveNotes} />
       </section>
     </main>
   );

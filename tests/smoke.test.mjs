@@ -40,14 +40,16 @@ test("pwa is configured for Russian phone usage", async () => {
 });
 
 test("hive management prevents duplicates and supports deletion", async () => {
-  const page = await readFile("app/page.tsx", "utf8");
+  const hook = await readFile("app/hooks/use-hive-manager.ts", "utf8");
   const selector = await readFile("app/components/hive-selector.tsx", "utf8");
 
-  assert.match(page, /alreadyExists/);
-  assert.match(page, /Улей с таким номером уже есть/);
-  assert.match(page, /function removeHive/);
+  assert.match(hook, /alreadyExists/);
+  assert.match(hook, /Улей с таким номером уже есть/);
+  assert.match(hook, /function removeHive/);
+  assert.match(hook, /function renameHive/);
   assert.match(selector, /Удалить улей/);
-  assert.match(page, /Нельзя удалить последний улей/);
+  assert.match(selector, /Переименовать/);
+  assert.match(hook, /Нельзя удалить последний улей/);
 });
 
 test("transcription route proxies ElevenLabs without exposing a fixed key", async () => {

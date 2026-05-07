@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import type { Hive } from "../lib/hive-state";
 import styles from "./hive-selector.module.css";
 
@@ -5,10 +6,12 @@ type HiveSelectorProps = {
   error: string;
   hives: Hive[];
   newHiveName: string;
+  selectedHive: Hive | undefined;
   selectedHiveId: string;
   onAddHive: () => void;
   onNewHiveNameChange: (name: string) => void;
   onRemoveHive: (hiveId: string) => void;
+  onRenameHive: (hiveId: string, name: string) => void;
   onSelectHive: (hiveId: string) => void;
 };
 
@@ -16,12 +19,25 @@ export function HiveSelector({
   error,
   hives,
   newHiveName,
+  selectedHive,
   selectedHiveId,
   onAddHive,
   onNewHiveNameChange,
   onRemoveHive,
+  onRenameHive,
   onSelectHive
 }: HiveSelectorProps) {
+  const [renameName, setRenameName] = useState(selectedHive?.name ?? "");
+
+  useEffect(() => {
+    setRenameName(selectedHive?.name ?? "");
+  }, [selectedHive?.id, selectedHive?.name]);
+
+  function submitRename() {
+    if (!selectedHive) return;
+    onRenameHive(selectedHive.id, renameName);
+  }
+
   return (
     <section className="panel" aria-labelledby="hive-title">
       <div className="section-head">
@@ -60,8 +76,21 @@ export function HiveSelector({
           Добавить
         </button>
       </div>
+      <div className={styles.renameRow}>
+        <input
+          aria-label="Переименовать выбранный улей"
+          inputMode="text"
+          onChange={(event) => setRenameName(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") submitRename();
+          }}
+          value={renameName}
+        />
+        <button onClick={submitRename} type="button">
+          Переименовать
+        </button>
+      </div>
       {error ? <p className="error compact">{error}</p> : null}
     </section>
   );
 }
-

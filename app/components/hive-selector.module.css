@@ -12,12 +12,17 @@
   border: 1px solid #dfd2b1;
   border-radius: 8px;
   background: #ffffff;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    transform 160ms ease;
 }
 
 .active {
   border-color: #8d5d00;
   background: #f5c542;
   color: #211601;
+  transform: translateY(-1px);
 }
 
 .select,
@@ -28,6 +33,9 @@
   background: transparent;
   color: #1d1a13;
   cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
 }
 
 .select {
@@ -47,14 +55,20 @@
   color: #a2332d;
 }
 
-.addRow {
+.addRow,
+.renameRow {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 8px;
   margin-top: 12px;
 }
 
-.addRow input {
+.renameRow {
+  margin-top: 8px;
+}
+
+.addRow input,
+.renameRow input {
   min-width: 0;
   min-height: 48px;
   border: 1px solid #dfd2b1;
@@ -63,12 +77,34 @@
   background: #ffffff;
 }
 
-.addRow button {
+.addRow button,
+.renameRow button {
   min-height: 48px;
   border-radius: 8px;
   padding: 0 16px;
   background: #1d1a13;
   color: #fff;
   font-weight: 800;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
 }
 
+.addRow button:active,
+.renameRow button:active {
+  transform: translateY(1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile,
+  .select,
+  .delete,
+  .addRow button,
+  .renameRow button {
+    transition: none;
+  }
+
+  .active {
+    transform: none;
+  }
+}

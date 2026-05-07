@@ -101,6 +101,7 @@ h1 {
   border-radius: 8px;
   background: rgba(255, 250, 240, 0.9);
   box-shadow: var(--shadow);
+  animation: panel-rise 220ms ease both;
 }
 
 .section-head {
@@ -151,6 +152,10 @@ h1 {
   background: transparent;
   color: var(--muted);
   font-weight: 800;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .segmented button.active {
@@ -172,6 +177,14 @@ h1 {
   color: #fff;
   font-size: 1.45rem;
   font-weight: 900;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.record-button:active {
+  transform: translateY(1px);
 }
 
 .record-button.recording {
@@ -196,6 +209,10 @@ h1 {
   color: var(--muted);
   font-size: 0.94rem;
   font-weight: 800;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .entry-field.active {
@@ -227,6 +244,14 @@ textarea {
   color: var(--text);
   font-size: 1rem;
   line-height: 1.4;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(216, 153, 19, 0.16);
 }
 
 .error {
@@ -256,5 +281,34 @@ textarea {
 
   .field-grid {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+@keyframes panel-rise {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    animation: none;
+  }
+
+  .segmented button,
+  .record-button,
+  .entry-field,
+  textarea {
+    transition: none;
+  }
+
+  .record-button:active {
+    transform: none;
   }
 }
