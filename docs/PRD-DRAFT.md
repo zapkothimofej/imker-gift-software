@@ -2,33 +2,48 @@
 
 ## Problem
 
-Noch offen. Muss aus den Antworten in `docs/QUESTIONS.md` abgeleitet werden.
+Der Vater fuehrt seine Imker-Stockkarten aktuell auf Papier. Er schreibt per Hand auf, was er am Volk gemacht hat und was beim naechsten Mal erledigt werden soll. Das dauert zu lange und ist der zentrale Schmerzpunkt.
 
 ## Zielgruppe
 
-Primaer: dein Vater als Imker.
+Primaer: dein Vater als Imker, mit Nutzung auf dem Smartphone.
 
 Sekundaer: optional du als technischer Helfer/Admin.
 
 ## Vorlaeufige Produktthese
 
-Eine persoenliche, einfach bedienbare Imker-App, die Völker, Kontrollen und wichtige Erinnerungen so leicht macht, dass sie im echten Alltag genutzt wird.
+Eine russischsprachige PWA fuer das Handy, mit der dein Vater einen Bienenstock auswaehlt, neue Stoecke anlegt und Kontrollen per Sprache diktiert. Die App speichert pro Stock, was gemacht wurde und was beim naechsten Mal zu tun ist.
+
+## Entschieden
+
+- Plattform: PWA fuer Smartphone.
+- Sprache: Russisch fuer UI und Inhalt.
+- Hauptinput: Spracheingabe auf Russisch plus sichtbares Eingabefeld.
+- Datenobjekt: Bienenstock/Volk kann ausgewaehlt und neu angelegt werden.
+- Papier-Stockkarte wird durch schnelle digitale Notizen ersetzt.
+- Honigverkauf ist fuer den MVP nicht relevant.
+- Deadline: Hauptfunktionen muessen bis morgen nutzbar sein.
 
 ## Noch nicht entschieden
 
-- Plattform: Web/PWA, native Mobile, Desktop oder hybrid.
-- Offline-Strategie.
-- Cloud/Backup/Login.
-- MVP-Funktionsumfang.
-- Designrichtung und Geschenk-Inszenierung.
+- Zielgeraet/Browser: iPhone/Safari oder Android/Chrome.
+- Speech-to-Text: Browser-Spracheingabe oder serverseitige Transkription.
+- Offline-Strategie fuer Spracheingabe und Datenspeicherung.
+- Backup/Synchronisation.
+- Designrichtung und Geburtstags-Inszenierung.
 
-## Wahrscheinlicher MVP-Kandidat
+## MVP fuer morgen
 
-- Völker und Standorte anlegen.
-- Schnelle Kontrolle pro Volk erfassen.
-- Einfache Erinnerungen/Aufgaben.
-- Uebersicht, was als Naechstes zu tun ist.
-- Optional persoenliche Geburtstags-Widmung.
+- Russische PWA mit Startbildschirm.
+- Liste der Stoecke/Voelker.
+- Neuen Stock anlegen.
+- Stock auswaehlen.
+- Grossen Aufnahme-/Diktier-Button anzeigen.
+- Russischen Text per Sprache erfassen oder manuell bearbeiten.
+- Notiz pro Stock speichern.
+- Notiz trennt mindestens: erledigt / naechstes Mal.
+- Historie pro Stock anzeigen.
+- Daten lokal speichern, solange keine Cloud-Entscheidung getroffen ist.
 
 ## Nicht-Ziele bis zur Klaerung
 
@@ -36,4 +51,10 @@ Eine persoenliche, einfach bedienbare Imker-App, die Völker, Kontrollen und wic
 - Keine Rechnungsstellung.
 - Keine App-Store-Abhaengigkeit.
 - Keine Cloud-Pflicht ohne Datenschutzentscheidung.
+- Keine Honigverkaufsfunktionen im MVP.
 
+## Kritische Risiken
+
+- Browser-Spracheingabe ist je nach Smartphone/Browser unterschiedlich verlaesslich.
+- Offline-Spracherkennung ist wahrscheinlich nicht verlaesslich genug fuer den MVP.
+- Russische UI muss konsequent sein; deutsche/englische Mischtexte waeren fuer das Geschenk schlecht.
