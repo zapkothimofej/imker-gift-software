@@ -1,13 +1,13 @@
 .grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 
 .tile {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 44px;
-  min-height: 54px;
+  min-height: 52px;
   overflow: hidden;
   border: 1px solid #dfd2b1;
   border-radius: 8px;
@@ -45,7 +45,10 @@
   font-size: 1.2rem;
   font-weight: 800;
   line-height: 1.15;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  padding: 0 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .delete {
@@ -69,7 +72,18 @@
 }
 
 .renameRow {
+  grid-template-columns: 1fr;
   margin-top: 8px;
+  padding: 10px;
+  border: 1px solid rgba(223, 210, 177, 0.7);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.52);
+}
+
+.renameLabel {
+  color: #665d4a;
+  font-size: 0.84rem;
+  font-weight: 800;
 }
 
 .addRow input,
@@ -151,6 +165,10 @@
 @media (max-width: 420px) {
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .active {
+    grid-column: span 2;
   }
 
   .addRow,

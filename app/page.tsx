@@ -20,6 +20,9 @@ export default function Home() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const hiveManager = useHiveManager({ notes, setNotes, setStatus });
+  const pageTitle =
+    activeView === "hives" ? "Пасека" : activeView === "record" ? "Новая запись" : "Журнал";
+  const hasDraft = Boolean(done.trim() || next.trim());
 
   useEffect(() => {
     const saved = window.localStorage.getItem(STORAGE_KEY);
@@ -46,6 +49,10 @@ export default function Home() {
       navigator.serviceWorker.register("/sw.js").catch(() => undefined);
     }
   }, []);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeView]);
 
   function saveNote() {
     const cleanDone = done.trim();
@@ -148,22 +155,24 @@ export default function Home() {
       <header className="app-header" aria-labelledby="app-title">
         <div>
           <p className="eyebrow">Пасека</p>
-          <h1 id="app-title">Журнал</h1>
+          <h1 id="app-title">{pageTitle}</h1>
         </div>
-        <label className="hive-switcher">
-          <span>Выбранный улей</span>
-          <select
-            aria-label="Выбранный улей"
-            onChange={(event) => hiveManager.setSelectedHiveId(event.target.value)}
-            value={hiveManager.selectedHiveId}
-          >
-            {hiveManager.hives.map((hive) => (
-              <option key={hive.id} value={hive.id}>
-                Улей {hive.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        {activeView !== "hives" ? (
+          <label className="hive-switcher">
+            <span>Выбранный улей</span>
+            <select
+              aria-label="Выбранный улей"
+              onChange={(event) => hiveManager.setSelectedHiveId(event.target.value)}
+              value={hiveManager.selectedHiveId}
+            >
+              {hiveManager.hives.map((hive) => (
+                <option key={hive.id} value={hive.id}>
+                  Улей {hive.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
       </header>
 
       {activeView === "hives" ? (
@@ -235,11 +244,16 @@ export default function Home() {
             </label>
           </div>
 
-          {recordError ? <p className="error">{recordError}</p> : null}
-
-          <button className="save-button" onClick={saveNote} type="button">
+          <button
+            className={hasDraft ? "save-button ready" : "save-button"}
+            disabled={!hasDraft}
+            onClick={saveNote}
+            type="button"
+          >
             Сохранить запись
           </button>
+
+          {recordError ? <p className="error">{recordError}</p> : null}
         </section>
       ) : null}
 

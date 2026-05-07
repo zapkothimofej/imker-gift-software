@@ -123,8 +123,11 @@ test("mobile gift flow is usable without layout or runtime regressions", async (
       await page.evaluate(() => localStorage.clear());
       await page.reload({ waitUntil: "networkidle" });
 
+      await assert.equal(await page.locator("h1").textContent(), "Новая запись");
       await assertNoHorizontalOverflow(page);
       await assertTouchTargets(page);
+      await assertInViewport(page.getByRole("button", { name: "Сохранить запись" }));
+      await assert.equal(await page.getByRole("button", { name: "Сохранить запись" }).isDisabled(), true);
       await page.screenshot({ path: `${ARTIFACT_DIR}/mobile-home.png`, fullPage: true });
 
       await page.getByRole("button", { name: "Следующий осмотр" }).click();
@@ -132,6 +135,7 @@ test("mobile gift flow is usable without layout or runtime regressions", async (
       await page.getByRole("button", { name: "Остановить" }).click();
       const nextTextarea = page.locator("label.entry-field").filter({ hasText: "Следующий осмотр" }).locator("textarea");
       await waitForValue(nextTextarea, /матка есть/);
+      await assert.equal(await page.getByRole("button", { name: "Сохранить запись" }).isEnabled(), true);
 
       await page.getByLabel("Сделано").fill("Осмотрел рамки");
       await page.getByRole("button", { name: "Сохранить запись" }).click();
@@ -140,13 +144,18 @@ test("mobile gift flow is usable without layout or runtime regressions", async (
 
       await page.reload({ waitUntil: "networkidle" });
       await page.getByRole("button", { name: "Журнал" }).click();
+      await assert.equal(await page.locator("h1").textContent(), "Журнал");
+      await assertPageAtTop(page);
       await assert.equal(await page.getByText("Осмотрел рамки").isVisible(), true);
       await assert.equal(await page.getByText("матка есть").isVisible(), true);
 
       await page.getByRole("button", { name: "Пасека" }).click();
+      await assert.equal(await page.locator("h1").textContent(), "Пасека");
+      await assertPageAtTop(page);
+      await assert.equal(await page.getByRole("combobox", { name: "Выбранный улей" }).count(), 0);
       await page.getByLabel("Название нового улья").fill("9");
       await page.getByRole("button", { name: "Добавить" }).click();
-      await assert.equal(await selectedHiveLabel(page), "Улей 9");
+      await waitForValue(page.getByLabel("Переименовать выбранный улей"), /^9$/);
 
       await page.getByLabel("Название нового улья").fill("9");
       await page.getByRole("button", { name: "Добавить" }).click();
@@ -154,7 +163,8 @@ test("mobile gift flow is usable without layout or runtime regressions", async (
 
       await page.getByLabel("Переименовать выбранный улей").fill("Северный 9");
       await page.getByRole("button", { name: "Переименовать" }).click();
-      await assert.equal(await selectedHiveLabel(page), "Улей Северный 9");
+      await waitForValue(page.getByLabel("Переименовать выбранный улей"), /^Северный 9$/);
+      await assertNoWrappedHiveTiles(page);
       await assertNoHorizontalOverflow(page);
 
       page.once("dialog", async (dialog) => {
@@ -230,12 +240,6 @@ async function waitForText(locator, expected, timeoutMs = 5000) {
   assert.equal(await locator.textContent(), expected);
 }
 
-async function selectedHiveLabel(page) {
-  return page.getByRole("combobox", { name: "Выбранный улей" }).evaluate((select) =>
-    select instanceof HTMLSelectElement ? select.selectedOptions[0]?.textContent?.trim() : ""
-  );
-}
-
 async function assertTouchTargets(page) {
   const smallTargets = await page.locator("button, input, select, textarea").evaluateAll((elements) =>
     elements
@@ -255,4 +259,36 @@ async function assertTouchTargets(page) {
   );
 
   assert.deepEqual(smallTargets, []);
+}
+
+async function assertInViewport(locator) {
+  const box = await locator.boundingBox();
+  assert.ok(box, "Expected element to have a bounding box");
+
+  const viewport = locator.page().viewportSize();
+  assert.ok(viewport, "Expected viewport size");
+  assert.ok(box.y >= 0 && box.y + box.height <= viewport.height, `Element is outside viewport: ${JSON.stringify(box)}`);
+}
+
+async function assertPageAtTop(page) {
+  await page.waitForFunction(() => window.scrollY === 0);
+  assert.equal(await page.evaluate(() => window.scrollY), 0);
+}
+
+async function assertNoWrappedHiveTiles(page) {
+  const wrappingTiles = await page.locator("[data-hive-id] button:first-child").evaluateAll((buttons) =>
+    buttons
+      .map((button) => {
+        const style = window.getComputedStyle(button);
+        return {
+          label: button.textContent?.trim(),
+          overflow: style.overflow,
+          textOverflow: style.textOverflow,
+          whiteSpace: style.whiteSpace
+        };
+      })
+      .filter((button) => button.whiteSpace !== "nowrap" || button.overflow === "visible" || button.textOverflow !== "ellipsis")
+  );
+
+  assert.deepEqual(wrappingTiles, []);
 }

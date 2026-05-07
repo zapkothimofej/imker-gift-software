@@ -143,6 +143,7 @@ export function HiveSelector({
         </button>
       </div>
       <div className={styles.renameRow}>
+        <span className={styles.renameLabel}>Выбранный улей</span>
         <input
           aria-label="Переименовать выбранный улей"
           inputMode="text"

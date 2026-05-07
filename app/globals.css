@@ -1,13 +1,13 @@
 :root {
   color-scheme: light;
-  --bg: #f8f4e7;
-  --surface: #fffaf0;
+  --bg: #f7f3e8;
+  --surface: #fffbf2;
   --surface-strong: #ffffff;
   --text: #1d1a13;
   --muted: #665d4a;
   --line: #dfd2b1;
-  --accent: #d89913;
-  --accent-strong: #8d5d00;
+  --accent: #c98b0a;
+  --accent-strong: #7a5200;
   --good: #2f7d50;
   --danger: #a2332d;
   --shadow: 0 14px 36px rgba(69, 49, 13, 0.12);
@@ -27,7 +27,8 @@ body {
   min-height: 100%;
   color: var(--text);
   background:
-    linear-gradient(180deg, rgba(245, 197, 66, 0.28), transparent 240px),
+    linear-gradient(180deg, rgba(245, 197, 66, 0.2), transparent 230px),
+    radial-gradient(circle at 92% 12%, rgba(47, 125, 80, 0.12), transparent 190px),
     var(--bg);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -60,7 +61,7 @@ textarea:focus-visible {
 .shell {
   width: min(100%, 760px);
   margin: 0 auto;
-  padding: max(12px, env(safe-area-inset-top)) 14px calc(76px + env(safe-area-inset-bottom));
+  padding: max(12px, env(safe-area-inset-top)) 14px calc(88px + env(safe-area-inset-bottom));
 }
 
 .app-header {
@@ -69,9 +70,9 @@ textarea:focus-visible {
   z-index: 5;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 12px;
-  margin: 0 -14px 12px;
-  padding: max(12px, env(safe-area-inset-top)) 14px 12px;
+  gap: 8px;
+  margin: 0 -14px 8px;
+  padding: max(10px, env(safe-area-inset-top)) 14px 10px;
   border-bottom: 1px solid rgba(223, 210, 177, 0.72);
   background:
     linear-gradient(180deg, rgba(248, 244, 231, 0.98), rgba(248, 244, 231, 0.92)),
@@ -95,8 +96,8 @@ p {
 }
 
 h1 {
-  font-size: clamp(2rem, 11vw, 3rem);
-  line-height: 0.96;
+  font-size: clamp(1.8rem, 8.6vw, 2.35rem);
+  line-height: 1;
   letter-spacing: 0;
 }
 
@@ -110,18 +111,18 @@ h1 {
 
 .hive-switcher select {
   width: 100%;
-  min-height: 52px;
+  min-height: 46px;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 0 42px 0 14px;
   background: var(--surface-strong);
   color: var(--text);
-  font-size: 1.16rem;
+  font-size: 1.02rem;
   font-weight: 900;
 }
 
 .panel {
-  margin-top: 12px;
+  margin-top: 10px;
   padding: 16px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -166,7 +167,7 @@ h1 {
 
 .bottom-nav button[aria-current="page"] {
   border-color: #e0ad28;
-  background: #f5c542;
+  background: #f4c542;
   color: #211601;
 }
 
@@ -189,12 +190,24 @@ h1 {
 }
 
 .save-button {
+  position: sticky;
+  bottom: calc(76px + env(safe-area-inset-bottom));
+  z-index: 4;
   min-height: 48px;
+  border: 1px solid var(--line);
   border-radius: 8px;
   padding: 0 16px;
-  background: var(--text);
-  color: #fff;
+  background: rgba(255, 250, 240, 0.96);
+  color: var(--muted);
   font-weight: 800;
+  box-shadow: none;
+}
+
+.save-button.ready {
+  border-color: #191610;
+  background: #191610;
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(29, 26, 19, 0.24);
 }
 
 .recorder {
@@ -236,7 +249,7 @@ h1 {
   align-items: center;
   justify-items: center;
   gap: 14px;
-  min-height: 82px;
+  min-height: 76px;
   border-radius: 8px;
   padding: 12px 18px;
   background: var(--good);
@@ -266,7 +279,7 @@ h1 {
   position: relative;
   display: grid;
   gap: 10px;
-  padding: 11px;
+  padding: 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background:
@@ -301,7 +314,7 @@ h1 {
 
 textarea {
   width: 100%;
-  min-height: 96px;
+  min-height: 82px;
   resize: vertical;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -309,10 +322,16 @@ textarea {
   background: var(--surface-strong);
   color: var(--text);
   font-size: 1rem;
+  font-weight: 500;
   line-height: 1.4;
   transition:
     border-color 160ms ease,
     box-shadow 160ms ease;
+}
+
+textarea::placeholder {
+  color: rgba(102, 93, 74, 0.72);
+  font-weight: 500;
 }
 
 textarea:focus {
@@ -353,6 +372,10 @@ textarea:focus {
 
   .field-grid {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .save-button {
+    position: static;
   }
 }
 
