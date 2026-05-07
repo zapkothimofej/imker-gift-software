@@ -85,5 +85,7 @@ test("transcription route proxies ElevenLabs without exposing a fixed key", asyn
   assert.match(route, /ELEVENLABS_API_KEY/);
   assert.match(route, /scribe_v2/);
   assert.match(route, /language_code/);
+  assert.match(route, /request\.formData\(\)\.catch/);
+  assert.match(route, /Неверный формат аудиозапроса/);
   assert.doesNotMatch(route, /sk_[A-Za-z0-9]/);
 });

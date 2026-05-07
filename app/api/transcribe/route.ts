@@ -12,7 +12,12 @@ export async function POST(request: Request) {
     );
   }
 
-  const inbound = await request.formData();
+  const inbound = await request.formData().catch(() => null);
+
+  if (!inbound) {
+    return NextResponse.json({ error: "Неверный формат аудиозапроса." }, { status: 400 });
+  }
+
   const audio = inbound.get("audio");
 
   if (!(audio instanceof File) || audio.size === 0) {
@@ -45,4 +50,3 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ text: payload?.text?.trim() ?? "" });
 }
-
