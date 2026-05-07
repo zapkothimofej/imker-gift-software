@@ -56,14 +56,24 @@
 }
 
 .addRow,
-.renameRow {
+.renameRow,
+.orderRow {
   display: grid;
-  grid-template-columns: 1fr auto;
   gap: 8px;
   margin-top: 12px;
 }
 
+.addRow,
 .renameRow {
+  grid-template-columns: 1fr auto;
+}
+
+.renameRow {
+  margin-top: 8px;
+}
+
+.orderRow {
+  grid-template-columns: 1fr 1fr;
   margin-top: 8px;
 }
 
@@ -78,7 +88,8 @@
 }
 
 .addRow button,
-.renameRow button {
+.renameRow button,
+.orderRow button {
   min-height: 48px;
   border-radius: 8px;
   padding: 0 16px;
@@ -91,8 +102,16 @@
 }
 
 .addRow button:active,
-.renameRow button:active {
+.renameRow button:active,
+.orderRow button:active {
   transform: translateY(1px);
+}
+
+.orderRow button:disabled {
+  background: #d8cfba;
+  color: #786f5c;
+  cursor: not-allowed;
+  transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -100,7 +119,8 @@
   .select,
   .delete,
   .addRow button,
-  .renameRow button {
+  .renameRow button,
+  .orderRow button {
     transition: none;
   }
 

@@ -80,7 +80,11 @@ export function useHiveManager({ notes, setNotes, setStatus }: UseHiveManagerPro
     }
 
     const hasNotes = notes.some((note) => note.hiveId === hiveId);
-    if (hasNotes && !window.confirm(`Удалить улей ${hive.name} и все его записи?`)) {
+    const message = hasNotes
+      ? `Удалить улей ${hive.name} и все его записи?`
+      : `Удалить улей ${hive.name}?`;
+
+    if (!window.confirm(message)) {
       return;
     }
 
@@ -96,11 +100,35 @@ export function useHiveManager({ notes, setNotes, setStatus }: UseHiveManagerPro
     setStatus("Улей удален");
   }
 
+  function moveHive(hiveId: string, direction: -1 | 1) {
+    const currentIndex = hives.findIndex((hive) => hive.id === hiveId);
+    const nextIndex = currentIndex + direction;
+
+    if (currentIndex < 0) return;
+
+    if (nextIndex < 0 || nextIndex >= hives.length) {
+      setHiveError(direction < 0 ? "Этот улей уже первый." : "Этот улей уже последний.");
+      return;
+    }
+
+    setHives((current) => {
+      const reordered = [...current];
+      [reordered[currentIndex], reordered[nextIndex]] = [
+        reordered[nextIndex],
+        reordered[currentIndex]
+      ];
+      return reordered;
+    });
+    setHiveError("");
+    setStatus("Порядок изменен");
+  }
+
   return {
     addHive,
     hiveError,
     hiveNotes,
     hives,
+    moveHive,
     newHiveName,
     removeHive,
     renameHive,
@@ -112,4 +140,3 @@ export function useHiveManager({ notes, setNotes, setStatus }: UseHiveManagerPro
     setSelectedHiveId
   };
 }
-

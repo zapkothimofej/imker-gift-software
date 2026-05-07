@@ -9,6 +9,7 @@ type HiveSelectorProps = {
   selectedHive: Hive | undefined;
   selectedHiveId: string;
   onAddHive: () => void;
+  onMoveHive: (hiveId: string, direction: -1 | 1) => void;
   onNewHiveNameChange: (name: string) => void;
   onRemoveHive: (hiveId: string) => void;
   onRenameHive: (hiveId: string, name: string) => void;
@@ -22,6 +23,7 @@ export function HiveSelector({
   selectedHive,
   selectedHiveId,
   onAddHive,
+  onMoveHive,
   onNewHiveNameChange,
   onRemoveHive,
   onRenameHive,
@@ -37,6 +39,10 @@ export function HiveSelector({
     if (!selectedHive) return;
     onRenameHive(selectedHive.id, renameName);
   }
+
+  const selectedIndex = hives.findIndex((hive) => hive.id === selectedHiveId);
+  const canMoveEarlier = selectedIndex > 0;
+  const canMoveLater = selectedIndex >= 0 && selectedIndex < hives.length - 1;
 
   return (
     <section className="panel" aria-labelledby="hive-title">
@@ -88,6 +94,22 @@ export function HiveSelector({
         />
         <button onClick={submitRename} type="button">
           Переименовать
+        </button>
+      </div>
+      <div className={styles.orderRow}>
+        <button
+          disabled={!selectedHive || !canMoveEarlier}
+          onClick={() => selectedHive && onMoveHive(selectedHive.id, -1)}
+          type="button"
+        >
+          ← Раньше
+        </button>
+        <button
+          disabled={!selectedHive || !canMoveLater}
+          onClick={() => selectedHive && onMoveHive(selectedHive.id, 1)}
+          type="button"
+        >
+          Позже →
         </button>
       </div>
       {error ? <p className="error compact">{error}</p> : null}

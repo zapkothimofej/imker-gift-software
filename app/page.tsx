@@ -156,6 +156,7 @@ export default function Home() {
         hives={hiveManager.hives}
         newHiveName={hiveManager.newHiveName}
         onAddHive={hiveManager.addHive}
+        onMoveHive={hiveManager.moveHive}
         onNewHiveNameChange={hiveManager.setNewHiveName}
         onRemoveHive={hiveManager.removeHive}
         onRenameHive={hiveManager.renameHive}
