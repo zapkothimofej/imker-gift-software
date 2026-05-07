@@ -6,7 +6,7 @@
 
 .tile {
   display: grid;
-  grid-template-columns: 1fr 34px;
+  grid-template-columns: minmax(0, 1fr) 44px;
   min-height: 54px;
   overflow: hidden;
   border: 1px solid #dfd2b1;
@@ -44,6 +44,8 @@
 .select {
   font-size: 1.2rem;
   font-weight: 800;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
 }
 
 .delete {
@@ -147,6 +149,10 @@
 }
 
 @media (max-width: 420px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .addRow,
   .renameRow {
     grid-template-columns: 1fr;
