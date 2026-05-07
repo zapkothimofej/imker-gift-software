@@ -1,0 +1,46 @@
+.wave {
+  display: inline-grid;
+  grid-auto-flow: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 78px;
+  min-height: 54px;
+  padding: 0 4px;
+}
+
+.wave span {
+  width: 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  transform-origin: center;
+}
+
+.active span {
+  animation: wave-pulse 760ms ease-in-out infinite;
+}
+
+.active span:nth-child(2n) {
+  animation-delay: 120ms;
+}
+
+.active span:nth-child(3n) {
+  animation-delay: 240ms;
+}
+
+@keyframes wave-pulse {
+  0%,
+  100% {
+    transform: scaleY(0.65);
+  }
+
+  50% {
+    transform: scaleY(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .active span {
+    animation: none;
+  }
+}
+

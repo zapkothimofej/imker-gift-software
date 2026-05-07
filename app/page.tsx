@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { NoteHistory } from "./components/note-history";
+import { VoiceWave } from "./components/voice-wave";
 import {
   createId,
   DEFAULT_HIVES,
-  formatDate,
   initialState,
   STORAGE_KEY,
   type Hive,
@@ -237,25 +238,30 @@ export default function Home() {
           onClick={recording ? stopRecording : startRecording}
           type="button"
         >
-          {recording ? "Остановить" : transcribing ? "Распознаю..." : "Говорить"}
+          <VoiceWave active={recording || transcribing} />
+          <span>{recording ? "Остановить" : transcribing ? "Распознаю..." : "Говорить"}</span>
         </button>
 
-        <label>
-          Сделано
+        <div className="field-grid">
+          <label className={targetField === "done" ? "entry-field active" : "entry-field"}>
+            <span>Сделано</span>
+            <small>Что уже сделали у этого улья</small>
+            <textarea
+              onChange={(event) => setDone(event.target.value)}
+              placeholder="Например: проверил рамки, добавил вощину..."
+              value={done}
+            />
+          </label>
+          <label className={targetField === "next" ? "entry-field active" : "entry-field"}>
+            <span>В следующий раз</span>
+            <small>Что нужно не забыть при следующем осмотре</small>
           <textarea
-            onChange={(event) => setDone(event.target.value)}
-            placeholder="Например: проверил рамки, добавил вощину..."
-            value={done}
+              onChange={(event) => setNext(event.target.value)}
+              placeholder="Например: проверить корм, посмотреть матку..."
+              value={next}
           />
-        </label>
-        <label>
-          В следующий раз
-          <textarea
-            onChange={(event) => setNext(event.target.value)}
-            placeholder="Например: проверить корм, посмотреть матку..."
-            value={next}
-          />
-        </label>
+          </label>
+        </div>
 
         {error ? <p className="error">{error}</p> : null}
 
@@ -269,29 +275,7 @@ export default function Home() {
           <h2 id="history-title">История</h2>
           <span>{hiveNotes.length}</span>
         </div>
-        {hiveNotes.length === 0 ? (
-          <p className="empty">Для этого улья пока нет записей.</p>
-        ) : (
-          <div className="notes">
-            {hiveNotes.map((note) => (
-              <article className="note" key={note.id}>
-                <time>{formatDate(note.createdAt)}</time>
-                {note.done ? (
-                  <>
-                    <h3>Сделано</h3>
-                    <p>{note.done}</p>
-                  </>
-                ) : null}
-                {note.next ? (
-                  <>
-                    <h3>В следующий раз</h3>
-                    <p>{note.next}</p>
-                  </>
-                ) : null}
-              </article>
-            ))}
-          </div>
-        )}
+        <NoteHistory notes={hiveNotes} />
       </section>
     </main>
   );
