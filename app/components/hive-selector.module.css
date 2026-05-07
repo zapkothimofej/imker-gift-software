@@ -1,0 +1,74 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tile {
+  display: grid;
+  grid-template-columns: 1fr 34px;
+  min-height: 54px;
+  overflow: hidden;
+  border: 1px solid #dfd2b1;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.active {
+  border-color: #8d5d00;
+  background: #f5c542;
+  color: #211601;
+}
+
+.select,
+.delete {
+  min-width: 0;
+  min-height: 52px;
+  border: 0;
+  background: transparent;
+  color: #1d1a13;
+  cursor: pointer;
+}
+
+.select {
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.delete {
+  border-left: 1px solid rgba(102, 93, 74, 0.22);
+  color: #665d4a;
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.delete:active {
+  background: rgba(162, 51, 45, 0.1);
+  color: #a2332d;
+}
+
+.addRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.addRow input {
+  min-width: 0;
+  min-height: 48px;
+  border: 1px solid #dfd2b1;
+  border-radius: 8px;
+  padding: 0 12px;
+  background: #ffffff;
+}
+
+.addRow button {
+  min-height: 48px;
+  border-radius: 8px;
+  padding: 0 16px;
+  background: #1d1a13;
+  color: #fff;
+  font-weight: 800;
+}
+

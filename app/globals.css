@@ -121,45 +121,6 @@ h1 {
   text-align: right;
 }
 
-.hive-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.hive-button {
-  min-height: 54px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface-strong);
-  color: var(--text);
-  font-size: 1.2rem;
-  font-weight: 800;
-}
-
-.hive-button.active {
-  border-color: var(--accent-strong);
-  background: #f5c542;
-  color: #211601;
-}
-
-.add-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.add-row input {
-  min-width: 0;
-  min-height: 48px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 0 12px;
-  background: var(--surface-strong);
-}
-
-.add-row button,
 .save-button {
   min-height: 48px;
   border-radius: 8px;
@@ -274,6 +235,10 @@ textarea {
   background: #fff1ee;
   color: var(--danger);
   font-weight: 700;
+}
+
+.error.compact {
+  margin-top: 10px;
 }
 
 .empty {

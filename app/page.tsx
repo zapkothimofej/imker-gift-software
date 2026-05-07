@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { HiveSelector } from "./components/hive-selector";
 import { NoteHistory } from "./components/note-history";
 import { VoiceWave } from "./components/voice-wave";
 import {
@@ -24,7 +25,8 @@ export default function Home() {
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [status, setStatus] = useState("Готово к записи");
-  const [error, setError] = useState("");
+  const [hiveError, setHiveError] = useState("");
+  const [recordError, setRecordError] = useState("");
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
@@ -40,7 +42,7 @@ export default function Home() {
         setSelectedHiveId(parsed.hives[0].id);
       }
     } catch {
-      setError("Не удалось прочитать сохраненные данные.");
+      setHiveError("Не удалось прочитать сохраненные данные.");
     }
   }, []);
 
@@ -60,14 +62,54 @@ export default function Home() {
     [notes, selectedHiveId]
   );
 
+  function normalizeHiveName(value: string) {
+    return value.trim().replace(/\s+/g, " ").toLowerCase();
+  }
+
   function addHive() {
     const name = newHiveName.trim();
     if (!name) return;
+
+    const normalizedName = normalizeHiveName(name);
+    const alreadyExists = hives.some((hive) => normalizeHiveName(hive.name) === normalizedName);
+
+    if (alreadyExists) {
+      setHiveError("Улей с таким номером уже есть.");
+      return;
+    }
 
     const hive = { id: createId("hive"), name };
     setHives((current) => [...current, hive]);
     setSelectedHiveId(hive.id);
     setNewHiveName("");
+    setHiveError("");
+    setStatus("Улей добавлен");
+  }
+
+  function removeHive(hiveId: string) {
+    const hive = hives.find((current) => current.id === hiveId);
+    if (!hive) return;
+
+    if (hives.length <= 1) {
+      setHiveError("Нельзя удалить последний улей.");
+      return;
+    }
+
+    const hasNotes = notes.some((note) => note.hiveId === hiveId);
+    if (hasNotes && !window.confirm(`Удалить улей ${hive.name} и все его записи?`)) {
+      return;
+    }
+
+    const remainingHives = hives.filter((current) => current.id !== hiveId);
+    setHives(remainingHives);
+    setNotes((current) => current.filter((note) => note.hiveId !== hiveId));
+
+    if (selectedHiveId === hiveId) {
+      setSelectedHiveId(remainingHives[0].id);
+    }
+
+    setHiveError("");
+    setStatus("Улей удален");
   }
 
   function saveNote() {
@@ -75,7 +117,7 @@ export default function Home() {
     const cleanNext = next.trim();
 
     if (!selectedHive || (!cleanDone && !cleanNext)) {
-      setError("Выберите улей и добавьте запись.");
+      setRecordError("Выберите улей и добавьте запись.");
       return;
     }
 
@@ -91,7 +133,7 @@ export default function Home() {
     ]);
     setDone("");
     setNext("");
-    setError("");
+    setRecordError("");
     setStatus("Запись сохранена");
   }
 
@@ -122,10 +164,10 @@ export default function Home() {
   }
 
   async function startRecording() {
-    setError("");
+    setRecordError("");
 
     if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
-      setError("Запись голоса не поддерживается в этом браузере. Используйте текстовое поле.");
+      setRecordError("Запись голоса не поддерживается в этом браузере. Используйте текстовое поле.");
       return;
     }
 
@@ -143,7 +185,7 @@ export default function Home() {
         const audio = new Blob(audioChunksRef.current, { type: recorder.mimeType || "audio/webm" });
         transcribeAudio(audio)
           .catch((caught: unknown) => {
-            setError(caught instanceof Error ? caught.message : "Ошибка распознавания.");
+            setRecordError(caught instanceof Error ? caught.message : "Ошибка распознавания.");
             setStatus("Ошибка");
           })
           .finally(() => setTranscribing(false));
@@ -154,7 +196,7 @@ export default function Home() {
       setRecording(true);
       setStatus("Идет запись...");
     } catch {
-      setError("Не удалось получить доступ к микрофону.");
+      setRecordError("Не удалось получить доступ к микрофону.");
       setStatus("Нет доступа к микрофону");
     }
   }
@@ -175,39 +217,16 @@ export default function Home() {
         <p className="hero-text">Выберите улей, продиктуйте заметку и сохраните, что сделано и что нужно проверить в следующий раз.</p>
       </section>
 
-      <section className="panel" aria-labelledby="hive-title">
-        <div className="section-head">
-          <h2 id="hive-title">Ульи</h2>
-          <span>{hives.length}</span>
-        </div>
-        <div className="hive-grid" role="list" aria-label="Список ульев">
-          {hives.map((hive) => (
-            <button
-              className={hive.id === selectedHiveId ? "hive-button active" : "hive-button"}
-              key={hive.id}
-              onClick={() => setSelectedHiveId(hive.id)}
-              type="button"
-            >
-              {hive.name}
-            </button>
-          ))}
-        </div>
-        <div className="add-row">
-          <input
-            aria-label="Название нового улья"
-            inputMode="text"
-            onChange={(event) => setNewHiveName(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") addHive();
-            }}
-            placeholder="Новый улей"
-            value={newHiveName}
-          />
-          <button onClick={addHive} type="button">
-            Добавить
-          </button>
-        </div>
-      </section>
+      <HiveSelector
+        error={hiveError}
+        hives={hives}
+        newHiveName={newHiveName}
+        onAddHive={addHive}
+        onNewHiveNameChange={setNewHiveName}
+        onRemoveHive={removeHive}
+        onSelectHive={setSelectedHiveId}
+        selectedHiveId={selectedHiveId}
+      />
 
       <section className="panel recorder" aria-labelledby="record-title">
         <div className="section-head">
@@ -261,7 +280,7 @@ export default function Home() {
           </label>
         </div>
 
-        {error ? <p className="error">{error}</p> : null}
+        {recordError ? <p className="error">{recordError}</p> : null}
 
         <button className="save-button" onClick={saveNote} type="button">
           Сохранить запись

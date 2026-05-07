@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 const requiredFiles = [
   "README.md",
   "app/page.tsx",
+  "app/components/hive-selector.tsx",
   "app/api/transcribe/route.ts",
   "docs/QUESTIONS.md",
   "docs/ANSWER-TEMPLATE.md",
@@ -36,6 +37,17 @@ test("pwa is configured for Russian phone usage", async () => {
   assert.match(page, /Говорить/);
   assert.match(page, /Сделано/);
   assert.match(page, /В следующий раз/);
+});
+
+test("hive management prevents duplicates and supports deletion", async () => {
+  const page = await readFile("app/page.tsx", "utf8");
+  const selector = await readFile("app/components/hive-selector.tsx", "utf8");
+
+  assert.match(page, /alreadyExists/);
+  assert.match(page, /Улей с таким номером уже есть/);
+  assert.match(page, /function removeHive/);
+  assert.match(selector, /Удалить улей/);
+  assert.match(page, /Нельзя удалить последний улей/);
 });
 
 test("transcription route proxies ElevenLabs without exposing a fixed key", async () => {
