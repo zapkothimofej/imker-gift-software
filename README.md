@@ -27,6 +27,7 @@ Der aktuelle Stand ist bewusst ein Discovery- und Planungsgeruest. Der konkrete 
 - `docs/ANSWER-TEMPLATE.md` - Vorlage zum Beantworten der Fragen.
 - `docs/PRD-DRAFT.md` - erster PRD-Rahmen, noch ohne finale Scope-Entscheidung.
 - `docs/DECISIONS.md` - technische und produktbezogene Entscheidungen.
+- `docs/GIFT-HANDOVER.md` - kurze Checkliste fuer die Geschenk-Uebergabe.
 - `tests/smoke.test.mjs` - Repo-Smoke-Test fuer das initiale Geruest.
 
 ## Lokale Checks

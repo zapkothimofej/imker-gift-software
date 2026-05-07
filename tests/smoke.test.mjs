@@ -11,8 +11,12 @@ const requiredFiles = [
   "docs/ANSWER-TEMPLATE.md",
   "docs/PRD-DRAFT.md",
   "docs/DECISIONS.md",
+  "docs/GIFT-HANDOVER.md",
   "public/manifest.webmanifest",
-  "public/sw.js"
+  "public/sw.js",
+  "public/icon-192.png",
+  "public/icon-512.png",
+  "public/apple-touch-icon.png"
 ];
 
 test("project scaffold files exist", async () => {
@@ -31,12 +35,28 @@ test("questions document contains at least 50 questions", async () => {
 test("pwa is configured for Russian phone usage", async () => {
   const manifest = JSON.parse(await readFile("public/manifest.webmanifest", "utf8"));
   const page = await readFile("app/page.tsx", "utf8");
+  const layout = await readFile("app/layout.tsx", "utf8");
 
   assert.equal(manifest.display, "standalone");
   assert.equal(manifest.lang, "ru");
+  assert.deepEqual(
+    manifest.icons.map((icon) => icon.src),
+    ["/icon.svg", "/icon-192.png", "/icon-512.png"]
+  );
+  assert.match(layout, /apple-touch-icon\.png/);
+  assert.match(layout, /appleWebApp/);
   assert.match(page, /Говорить/);
   assert.match(page, /Сделано/);
   assert.match(page, /В следующий раз/);
+});
+
+test("gift handover documents final phone checks", async () => {
+  const handover = await readFile("docs/GIFT-HANDOVER.md", "utf8");
+
+  assert.match(handover, /ELEVENLABS_API_KEY/);
+  assert.match(handover, /Home-Bildschirm/);
+  assert.match(handover, /Mikrofon/);
+  assert.match(handover, /Safari-Website-Daten/);
 });
 
 test("hive management prevents duplicates and supports deletion", async () => {
