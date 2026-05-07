@@ -8,11 +8,11 @@ const PORT = 3210;
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${PORT}`;
 const ARTIFACT_DIR = ".ui-test-artifacts";
 
-async function waitForServer(url, child, logs, timeoutMs = 30_000) {
+async function waitForServer(url, child, logs = [], timeoutMs = 30_000) {
   const startedAt = Date.now();
 
   while (Date.now() - startedAt < timeoutMs) {
-    if (child?.exitCode !== null) {
+    if (child && child.exitCode !== null) {
       throw new Error(`Server exited before becoming ready:\n${logs.join("")}`);
     }
 
